@@ -1,58 +1,584 @@
-// ===== 判定（修正版：10時間以上で確実に赤くする） =====
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1日の時間シミュレーター</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:        #f4f2ee;
+    --surface:   #ffffff;
+    --surface2:  #f0ede8;
+    --border:    #ddd9d1;
+    --accent:    #c9773a;   /* 温かみのあるオレンジ */
+    --accent2:   #3a7ec9;   /* 落ち着いたブルー */
+    --accent3:   #c93a4f;   /* レッド */
+    --accent4:   #2e9e6e;   /* グリーン */
+    --accent-warn: #c9a03a; /* アンバー */
+    --text:      #1e1c18;
+    --text-muted:#6b6659;
+    --text-dim:  #a8a296;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .header h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+
+  .header-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ===== MAIN ===== */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 48px;
+  }
+
+  /* ===== PAGE TITLE ===== */
+  .page-title {
+    margin-bottom: 28px;
+  }
+
+  .page-title h2 {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1.25;
+  }
+
+  .page-title h2 span {
+    color: var(--accent);
+  }
+
+  .page-title p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.9;
+    max-width: 540px;
+  }
+
+  /* ===== TIP ===== */
+  .tip-box {
+    background: #e8f0fb;
+    border-left: 3px solid var(--accent2);
+    padding: 11px 16px;
+    font-size: 12.5px;
+    color: #2c4a72;
+    line-height: 1.8;
+    margin-bottom: 24px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* ===== GRID ===== */
+  .time-calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 640px) {
+    .time-calc-grid { grid-template-columns: 1fr; }
+    .header { padding: 14px 18px; }
+    .main { padding: 20px 14px 40px; }
+  }
+
+  /* ===== CARDS ===== */
+  .time-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .time-card h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ===== SLIDER ROWS ===== */
+  .time-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .time-row-label {
+    font-size: 13px;
+    color: var(--text);
+    width: 130px;
+    flex-shrink: 0;
+  }
+
+  .time-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(201,119,58,0.4);
+    transition: transform 0.15s;
+  }
+
+  .time-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+
+  .time-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 44px;
+    text-align: right;
+  }
+
+  /* ===== TOTALS ===== */
+  .time-total {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .time-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .time-total-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .time-total-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .time-bar-wrap {
+    height: 7px;
+    background: var(--surface2);
+    border-radius: 4px;
+    margin-top: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .time-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.35s ease, background 0.35s ease;
+  }
+
+  /* ===== DONUT ===== */
+  .donut-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0 10px;
+  }
+
+  .donut-svg { overflow: visible; }
+
+  .donut-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    justify-content: center;
+    margin-top: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ===== ALERTS ===== */
+  .alert-box {
+    background: #fef2f4;
+    border: 1px solid #f3b8c0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: var(--text);
+  }
+
+  .alert-box strong { color: #a02030; }
+
+  .warn-box {
+    background: #fdf8ec;
+    border: 1px solid #e8d48a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: var(--text);
+  }
+
+  .warn-box strong { color: #7a5c10; }
+
+  .ok-box {
+    background: #edfaf4;
+    border: 1px solid #8ed4b0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: var(--text);
+  }
+
+  .ok-box strong { color: #1a6e47; }
+
+  /* ===== FOOTER NOTE ===== */
+  .footer-note {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 2;
+  }
+
+  .footer-note strong {
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="header-icon">🕐</div>
+  <div>
+    <h1>1日の時間シミュレーター</h1>
+    <div class="header-sub">先生の余白をつくる — 時間設計ツール</div>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+  <div class="page-title">
+    <h2>あなたの<span>1日24時間</span>を設計する</h2>
+    <p>スライダーを動かして、実際の時間配分を入力してください。「忙しい」を数字で証明し、構造的な問題として可視化します。</p>
+  </div>
+
+  <div class="tip-box">
+    💡 <strong>使い方</strong>：各項目を実態に合わせて調整してください。「仕事に使える時間」は自動計算されます。睡眠と仕事時間をもとに判定が表示されます。
+  </div>
+
+  <div class="time-calc-grid">
+
+    <!-- 左カード：スライダー -->
+    <div class="time-card">
+      <h3>生活時間の設定</h3>
+
+      <div class="time-row">
+        <span class="time-row-label">😴 睡眠</span>
+        <input type="range" class="time-slider" id="sl-sleep" min="4" max="9" step="0.5" value="7" oninput="updateCalc()">
+        <span class="time-value" id="v-sleep">7.0h</span>
+      </div>
+      <div class="time-row">
+        <span class="time-row-label">🌅 朝の家事</span>
+        <input type="range" class="time-slider" id="sl-morning" min="0" max="3.5" step="0.1" value="2.2" oninput="updateCalc()">
+        <span class="time-value" id="v-morning">2.2h</span>
+      </div>
+      <div class="time-row">
+        <span class="time-row-label">🌙 夜の家事</span>
+        <input type="range" class="time-slider" id="sl-evening" min="0" max="7" step="0.1" value="5.3" oninput="updateCalc()">
+        <span class="time-value" id="v-evening">5.3h</span>
+      </div>
+      <div class="time-row">
+        <span class="time-row-label">☕ 自分の時間</span>
+        <input type="range" class="time-slider" id="sl-meal" min="0" max="3" step="0.1" value="1" oninput="updateCalc()">
+        <span class="time-value" id="v-meal">1.0h</span>
+      </div>
+      <div class="time-row">
+        <span class="time-row-label">🚌 通勤（往復）</span>
+        <input type="range" class="time-slider" id="sl-commute" min="0" max="3" step="0.25" value="1" oninput="updateCalc()">
+        <span class="time-value" id="v-commute">1.0h</span>
+      </div>
+
+      <div class="time-total">
+        <div class="time-total-row">
+          <span class="time-total-label">生活時間合計</span>
+          <span class="time-total-value" id="lifetotal">16.5h</span>
+        </div>
+        <div class="time-total-row">
+          <span class="time-total-label">仕事に使える時間（残り）</span>
+          <span class="time-total-value" id="workavail" style="color:var(--accent2)">7.5h</span>
+        </div>
+        <div class="time-bar-wrap">
+          <div class="time-bar-fill" id="lifeBar" style="background:var(--accent);width:68%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右カード：チャート＋判定 -->
+    <div class="time-card">
+      <h3>1日のドーナツチャート</h3>
+      <div class="donut-wrap">
+        <svg class="donut-svg" width="200" height="200" viewBox="0 0 200 200" id="donutSvg"></svg>
+      </div>
+      <div class="donut-legend" id="donutLegend"></div>
+      <div id="timeAlert"></div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <div class="footer-note">
+    <strong>判定の根拠</strong>
+    ・厚生労働省「健康づくりのための睡眠ガイド 2023」：成人に6時間以上（推奨7時間以上）<br>
+    ・米国睡眠財団（NSF）：成人（18〜64歳）の推奨は7〜9時間<br>
+    ・文科省データ：教員の過労死ラインは月80時間超（1日換算 約11時間超）<br>
+    ・判定は睡眠時間と仕事時間のみで行います。通勤・家庭時間は判定に含みません。
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ===== カラー＆ラベル =====
+const DONUT_COLORS = ['#c9773a','#3a7ec9','#2e9e6e','#c9a03a','#9b6bbf','#888898'];
+const DONUT_LABELS = ['睡眠','朝の家事','夜の家事','自分の時間','通勤','仕事'];
+
+function getVal(id) {
+  return parseFloat(document.getElementById(id).value);
+}
+
+function updateCalc() {
+  const sleep   = getVal('sl-sleep');
+  const morning = getVal('sl-morning');
+  const evening = getVal('sl-evening');
+  const meal    = getVal('sl-meal');
+  const commute = getVal('sl-commute');
+
+  document.getElementById('v-sleep').textContent   = sleep.toFixed(1) + 'h';
+  document.getElementById('v-morning').textContent = morning.toFixed(1) + 'h';
+  document.getElementById('v-evening').textContent = evening.toFixed(1) + 'h';
+  document.getElementById('v-meal').textContent    = meal.toFixed(1) + 'h';
+  document.getElementById('v-commute').textContent = commute.toFixed(1) + 'h';
+
+  const lifeTotal = sleep + morning + evening + meal + commute;
+  const workAvail = 24 - lifeTotal;
+
+  document.getElementById('lifetotal').textContent = lifeTotal.toFixed(1) + 'h';
+
+  const waEl = document.getElementById('workavail');
+  waEl.textContent = Math.max(0, workAvail).toFixed(1) + 'h';
+  waEl.style.color = workAvail < 0
+    ? 'var(--accent3)'
+    : workAvail < 7
+      ? 'var(--accent-warn)'
+      : 'var(--accent4)';
+
+  const barPct = Math.min(100, (lifeTotal / 24) * 100);
+  const bar = document.getElementById('lifeBar');
+  bar.style.width = barPct + '%';
+  bar.style.background = lifeTotal > 24
+    ? 'var(--accent3)'
+    : lifeTotal > 20
+      ? 'var(--accent-warn)'
+      : 'var(--accent4)';
+
+  drawDonut([sleep, morning, evening, meal, commute, Math.max(0, workAvail)]);
+  showAlert(sleep, workAvail);
+}
+
+// ===== 判定 =====
 function showAlert(sleep, workAvail) {
   const alertEl = document.getElementById('timeAlert');
   const issues = [];
 
-  // 1. 判定フラグを立てる
-  // 睡眠のチェック
-  const isSleepCritical = (sleep < 6);
-  const isSleepWarn     = (sleep >= 6 && sleep < 7);
-  
-  // 仕事時間のチェック（10.0時間以上ならアウト）
-  const isWorkOver      = (workAvail >= 10.0);
+  if (sleep < 6)      issues.push('sleep-critical');
+  else if (sleep < 7) issues.push('sleep-warn');
 
-  // 2. 優先順位に従ってメッセージを表示
-  
-  // パターンA：睡眠も仕事時間も両方深刻な場合
-  if (isSleepCritical && isWorkOver) {
+  if (workAvail >= 11)      issues.push('work-karoshi');  // 過労死ライン
+  else if (workAvail >= 10) issues.push('work-over');     // 仕事時間過剰
+
+  const workIssue = issues.includes('work-karoshi') ? 'work-karoshi'
+                  : issues.includes('work-over')    ? 'work-over'
+                  : null;
+
+  if (issues.includes('sleep-critical') && workIssue) {
+    const workLabel = workIssue === 'work-karoshi'
+      ? `仕事時間 ${workAvail.toFixed(1)}時間（過労死ライン超）`
+      : `仕事時間 ${workAvail.toFixed(1)}時間（10時間以上）`;
+    const workDesc = workIssue === 'work-karoshi'
+      ? '文科省が示す「過労死ライン」（月80時間超 ≒ 1日11時間以上）を超えています。業務の削減・分担・外注を早急に検討してください。'
+      : '仕事時間が10時間以上になっています。過労死ラインに近づいています。業務の削減・分担を検討してください。';
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 深刻なリスク</strong><br>
-        ・睡眠不足（${sleep.toFixed(1)}h）と仕事過多（${workAvail.toFixed(1)}h）が重なっています。
-        非常に危険な状態です。即座に業務量の調整を行ってください。
+        <strong>🔴 改善必要 — 睡眠不足 ＋ 仕事時間過剰</strong><br>
+        <div style="margin-top:8px">・<strong>睡眠 ${sleep.toFixed(1)}時間（6時間未満）</strong>：厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。認知機能・感情コントロールが著しく低下します。</div>
+        <div style="margin-top:6px">・<strong>${workLabel}</strong>：${workDesc}</div>
       </div>`;
-  } 
-  // パターンB：仕事時間が10時間以上の場合（最優先で赤表示）
-  else if (isWorkOver) {
+  } else if (issues.includes('sleep-critical')) {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 仕事時間が過剰（${workAvail.toFixed(1)}h）</strong><br>
-        仕事時間が<strong>10時間以上</strong>に達しています。健康リスクを抑えるため、業務の削減・分担を検討してください。
+        <strong>🔴 改善必要 — 睡眠不足（${sleep.toFixed(1)}時間）</strong><br>
+        厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。睡眠6時間未満が続くと、認知機能・感情コントロール・記憶力が著しく低下します。まず睡眠時間の確保を優先してください。
       </div>`;
-  }
-  // パターンC：睡眠が6時間未満の場合
-  else if (isSleepCritical) {
+  } else if (workIssue === 'work-karoshi') {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 睡眠不足（${sleep.toFixed(1)}h）</strong><br>
-        睡眠が6時間未満です。認知機能が大幅に低下します。睡眠時間の確保を最優先してください。
+        <strong>🔴 改善必要 — 仕事時間過剰（${workAvail.toFixed(1)}時間 ／ 過労死ライン超）</strong><br>
+        文科省が示す教員の「過労死ライン」は月80時間超（1日換算で約11時間以上）です。この状態が続くと深刻な健康リスクがあります。業務の削減・分担・外注を早急に検討してください。
       </div>`;
-  }
-  // パターンD：睡眠が少し足りない場合（黄色）
-  else if (isSleepWarn) {
+  } else if (workIssue === 'work-over') {
+    alertEl.innerHTML = `
+      <div class="alert-box">
+        <strong>🔴 改善必要 — 仕事時間過剰（${workAvail.toFixed(1)}時間）</strong><br>
+        仕事時間が10時間以上になっています。過労死ライン（11時間以上）に近づいています。業務の見直しや分担を検討してください。
+      </div>`;
+  } else if (issues.includes('sleep-warn')) {
     alertEl.innerHTML = `
       <div class="warn-box">
-        <strong>🟡 改善必要 — 睡眠がやや不足（${sleep.toFixed(1)}h）</strong><br>
-        推奨される7時間を下回っています。少しずつ睡眠負債が溜まる恐れがあります。
+        <strong>🟡 改善必要 — 睡眠がやや不足（${sleep.toFixed(1)}時間）</strong><br>
+        最低基準（6時間）はクリアしていますが、推奨の<strong>7時間以上</strong>を下回っています。睡眠負債が蓄積しやすい状態です。業務削減で就寝時間を早めることを検討してください。
       </div>`;
-  }
-  // パターンE：すべてクリア
-  else {
+  } else {
     alertEl.innerHTML = `
       <div class="ok-box">
-        <strong>🟢 バランス良好</strong><br>
-        睡眠 ${sleep.toFixed(1)}h ／ 仕事 ${workAvail.toFixed(1)}h<br>
-        理想的な時間配分です。この状態を維持しましょう。
+        <strong>🟢 バランス良好　睡眠 ${sleep.toFixed(1)}h ／ 仕事 ${workAvail.toFixed(1)}h</strong><br>
+        睡眠7時間以上・仕事11時間以内を確保できています。適切な時間設計です。
       </div>`;
   }
 }
+
+// ===== ドーナツチャート =====
+function drawDonut(values) {
+  const svg = document.getElementById('donutSvg');
+  if (!svg) return;
+  svg.innerHTML = '';
+
+  const cx = 100, cy = 100, r = 72, hole = 46;
+  let angle = -Math.PI / 2;
+
+  values.forEach((val, i) => {
+    if (val <= 0) return;
+    const slice = (val / 24) * 2 * Math.PI;
+    const x1 = cx + r * Math.cos(angle);
+    const y1 = cy + r * Math.sin(angle);
+    angle += slice;
+    const x2 = cx + r * Math.cos(angle);
+    const y2 = cy + r * Math.sin(angle);
+    const large = slice > Math.PI ? 1 : 0;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`);
+    path.setAttribute('fill', DONUT_COLORS[i]);
+    path.setAttribute('opacity', '0.88');
+    svg.appendChild(path);
+  });
+
+  // 中央の白丸（穴）
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', cx);
+  circle.setAttribute('cy', cy);
+  circle.setAttribute('r', hole);
+  circle.setAttribute('fill', '#ffffff');
+  svg.appendChild(circle);
+
+  // 中央テキスト
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('x', cx);
+  text.setAttribute('y', cy);
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('dominant-baseline', 'middle');
+  text.setAttribute('fill', '#6b6659');
+  text.setAttribute('font-size', '13');
+  text.setAttribute('font-family', 'DM Mono, monospace');
+  text.textContent = '24h';
+  svg.appendChild(text);
+
+  // 凡例
+  const legend = document.getElementById('donutLegend');
+  if (legend) {
+    legend.innerHTML = DONUT_LABELS.map((l, i) =>
+      `<div class="legend-item">
+        <div class="legend-dot" style="background:${DONUT_COLORS[i]}"></div>
+        <span>${l}</span>
+      </div>`
+    ).join('');
+  }
+}
+
+// 初期描画
+updateCalc();
+</script>
+</body>
+</html>
