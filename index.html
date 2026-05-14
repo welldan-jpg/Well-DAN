@@ -1,45 +1,58 @@
-// ===== 判定（修正版：10時間以上で改善必要） =====
+// ===== 判定（修正版：10時間以上で確実に赤くする） =====
 function showAlert(sleep, workAvail) {
   const alertEl = document.getElementById('timeAlert');
   const issues = [];
 
-  // 睡眠の判定
-  if (sleep < 6)      issues.push('sleep-critical');
-  else if (sleep < 7) issues.push('sleep-warn');
+  // 1. 判定フラグを立てる
+  // 睡眠のチェック
+  const isSleepCritical = (sleep < 6);
+  const isSleepWarn     = (sleep >= 6 && sleep < 7);
+  
+  // 仕事時間のチェック（10.0時間以上ならアウト）
+  const isWorkOver      = (workAvail >= 10.0);
 
-  // 仕事時間の判定（11時間から10時間に基準を変更）
-  if (workAvail >= 10) issues.push('work-over');
-
-  if (issues.includes('sleep-critical') && issues.includes('work-over')) {
+  // 2. 優先順位に従ってメッセージを表示
+  
+  // パターンA：睡眠も仕事時間も両方深刻な場合
+  if (isSleepCritical && isWorkOver) {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 睡眠不足 ＋ 仕事時間過剰</strong><br>
-        <div style="margin-top:8px">・<strong>睡眠 ${sleep.toFixed(1)}時間（6時間未満）</strong>：厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。認知機能・感情コントロールが著しく低下します。</div>
-        <div style="margin-top:6px">・<strong>仕事時間 ${workAvail.toFixed(1)}時間（10時間以上）</strong>：仕事時間が10時間を超えると「改善が必要」な状態です。業務の削減・分担・外注を早急に検討してください。</div>
+        <strong>🔴 改善必要 — 深刻なリスク</strong><br>
+        ・睡眠不足（${sleep.toFixed(1)}h）と仕事過多（${workAvail.toFixed(1)}h）が重なっています。
+        非常に危険な状態です。即座に業務量の調整を行ってください。
       </div>`;
-  } else if (issues.includes('sleep-critical')) {
+  } 
+  // パターンB：仕事時間が10時間以上の場合（最優先で赤表示）
+  else if (isWorkOver) {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 睡眠不足（${sleep.toFixed(1)}時間）</strong><br>
-        厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。睡眠6時間未満が続くと、認知機能・感情コントロール・記憶力が著しく低下します。まず睡眠時間の確保を優先してください。
+        <strong>🔴 改善必要 — 仕事時間が過剰（${workAvail.toFixed(1)}h）</strong><br>
+        仕事時間が<strong>10時間以上</strong>に達しています。健康リスクを抑えるため、業務の削減・分担を検討してください。
       </div>`;
-  } else if (issues.includes('work-over')) {
+  }
+  // パターンC：睡眠が6時間未満の場合
+  else if (isSleepCritical) {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 仕事時間が過剰（${workAvail.toFixed(1)}時間）</strong><br>
-        仕事時間が<strong>10時間以上</strong>に達しているため、生活バランスの改善が必要です。この状態が続くと健康リスクが高まります。業務の削減・分担・外注を検討してください。
+        <strong>🔴 改善必要 — 睡眠不足（${sleep.toFixed(1)}h）</strong><br>
+        睡眠が6時間未満です。認知機能が大幅に低下します。睡眠時間の確保を最優先してください。
       </div>`;
-  } else if (issues.includes('sleep-warn')) {
+  }
+  // パターンD：睡眠が少し足りない場合（黄色）
+  else if (isSleepWarn) {
     alertEl.innerHTML = `
       <div class="warn-box">
-        <strong>🟡 改善必要 — 睡眠がやや不足（${sleep.toFixed(1)}時間）</strong><br>
-        最低基準（6時間）はクリアしていますが、推奨の<strong>7時間以上</strong>を下回っています。睡眠負債が蓄積しやすい状態です。業務削減で就寝時間を早めることを検討してください。
+        <strong>🟡 改善必要 — 睡眠がやや不足（${sleep.toFixed(1)}h）</strong><br>
+        推奨される7時間を下回っています。少しずつ睡眠負債が溜まる恐れがあります。
       </div>`;
-  } else {
+  }
+  // パターンE：すべてクリア
+  else {
     alertEl.innerHTML = `
       <div class="ok-box">
-        <strong>🟢 バランス良好　睡眠 ${sleep.toFixed(1)}h ／ 仕事 ${workAvail.toFixed(1)}h</strong><br>
-        睡眠7時間以上・仕事10時間未満を確保できています。適切な時間設計です。
+        <strong>🟢 バランス良好</strong><br>
+        睡眠 ${sleep.toFixed(1)}h ／ 仕事 ${workAvail.toFixed(1)}h<br>
+        理想的な時間配分です。この状態を維持しましょう。
       </div>`;
   }
 }
