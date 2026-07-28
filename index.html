@@ -182,7 +182,7 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--accent);
-    min-width: 44px;
+    min-width: 85px; /* 文字幅増加に伴い拡張 */
     text-align: right;
   }
 
@@ -350,37 +350,37 @@
       <div class="time-row">
         <span class="time-row-label">😴 睡眠</span>
         <input type="range" class="time-slider" id="sl-sleep" min="4" max="9" step="0.5" value="7" oninput="updateCalc()">
-        <span class="time-value" id="v-sleep">7.0h</span>
+        <span class="time-value" id="v-sleep">7時間</span>
       </div>
       <div class="time-row">
         <span class="time-row-label">🌅 朝の家事</span>
         <input type="range" class="time-slider" id="sl-morning" min="0" max="3.5" step="0.1" value="2.2" oninput="updateCalc()">
-        <span class="time-value" id="v-morning">2.2h</span>
+        <span class="time-value" id="v-morning">2時間12分</span>
       </div>
       <div class="time-row">
         <span class="time-row-label">🌙 夜の家事</span>
         <input type="range" class="time-slider" id="sl-evening" min="0" max="7" step="0.1" value="5.3" oninput="updateCalc()">
-        <span class="time-value" id="v-evening">5.3h</span>
+        <span class="time-value" id="v-evening">5時間18分</span>
       </div>
       <div class="time-row">
         <span class="time-row-label">☕ 自分の時間</span>
         <input type="range" class="time-slider" id="sl-meal" min="0" max="3" step="0.1" value="1" oninput="updateCalc()">
-        <span class="time-value" id="v-meal">1.0h</span>
+        <span class="time-value" id="v-meal">1時間</span>
       </div>
       <div class="time-row">
         <span class="time-row-label">🚌 通勤（往復）</span>
         <input type="range" class="time-slider" id="sl-commute" min="0" max="3" step="0.25" value="1" oninput="updateCalc()">
-        <span class="time-value" id="v-commute">1.0h</span>
+        <span class="time-value" id="v-commute">1時間</span>
       </div>
 
       <div class="time-total">
         <div class="time-total-row">
           <span class="time-total-label">生活時間合計</span>
-          <span class="time-total-value" id="lifetotal">16.5h</span>
+          <span class="time-total-value" id="lifetotal">16時間30分</span>
         </div>
         <div class="time-total-row">
           <span class="time-total-label">仕事に使える時間（残り）</span>
-          <span class="time-total-value" id="workavail" style="color:var(--accent2)">7.5h</span>
+          <span class="time-total-value" id="workavail" style="color:var(--accent2)">7時間30分</span>
         </div>
         <div class="time-bar-wrap">
           <div class="time-bar-fill" id="lifeBar" style="background:var(--accent);width:68%"></div>
@@ -419,6 +419,17 @@ function getVal(id) {
   return parseFloat(document.getElementById(id).value);
 }
 
+// 小数点の時間を「○時間○分」に変換する関数
+function formatTime(val) {
+  if (val < 0) val = 0; // 負の値は0として処理
+  const h = Math.floor(val);
+  const m = Math.round((val - h) * 60);
+  if (m === 60) return (h + 1) + '時間';
+  if (h === 0) return m + '分';
+  if (m === 0) return h + '時間';
+  return h + '時間' + m + '分';
+}
+
 function updateCalc() {
   const sleep   = getVal('sl-sleep');
   const morning = getVal('sl-morning');
@@ -426,19 +437,19 @@ function updateCalc() {
   const meal    = getVal('sl-meal');
   const commute = getVal('sl-commute');
 
-  document.getElementById('v-sleep').textContent   = sleep.toFixed(1) + 'h';
-  document.getElementById('v-morning').textContent = morning.toFixed(1) + 'h';
-  document.getElementById('v-evening').textContent = evening.toFixed(1) + 'h';
-  document.getElementById('v-meal').textContent    = meal.toFixed(1) + 'h';
-  document.getElementById('v-commute').textContent = commute.toFixed(1) + 'h';
+  document.getElementById('v-sleep').textContent   = formatTime(sleep);
+  document.getElementById('v-morning').textContent = formatTime(morning);
+  document.getElementById('v-evening').textContent = formatTime(evening);
+  document.getElementById('v-meal').textContent    = formatTime(meal);
+  document.getElementById('v-commute').textContent = formatTime(commute);
 
   const lifeTotal = sleep + morning + evening + meal + commute;
   const workAvail = 24 - lifeTotal;
 
-  document.getElementById('lifetotal').textContent = lifeTotal.toFixed(1) + 'h';
+  document.getElementById('lifetotal').textContent = formatTime(lifeTotal);
 
   const waEl = document.getElementById('workavail');
-  waEl.textContent = Math.max(0, workAvail).toFixed(1) + 'h';
+  waEl.textContent = formatTime(Math.max(0, workAvail));
   waEl.style.color = workAvail < 0
     ? 'var(--accent3)'
     : workAvail < 7
@@ -475,45 +486,45 @@ function showAlert(sleep, workAvail) {
 
   if (issues.includes('sleep-critical') && workIssue) {
     const workLabel = workIssue === 'work-karoshi'
-      ? `仕事時間 ${workAvail.toFixed(1)}時間（過労死ライン超）`
-      : `仕事時間 ${workAvail.toFixed(1)}時間（10時間以上）`;
+      ? `仕事時間 ${formatTime(workAvail)}（過労死ライン超）`
+      : `仕事時間 ${formatTime(workAvail)}（10時間以上）`;
     const workDesc = workIssue === 'work-karoshi'
       ? '文科省が示す「過労死ライン」（月80時間超 ≒ 1日11時間以上）を超えています。業務の削減・分担・外注を早急に検討してください。'
       : '仕事時間が10時間以上になっています。過労死ラインに近づいています。業務の削減・分担を検討してください。';
     alertEl.innerHTML = `
       <div class="alert-box">
         <strong>🔴 改善必要 — 睡眠不足 ＋ 仕事時間過剰</strong><br>
-        <div style="margin-top:8px">・<strong>睡眠 ${sleep.toFixed(1)}時間（6時間未満）</strong>：厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。認知機能・感情コントロールが著しく低下します。</div>
+        <div style="margin-top:8px">・<strong>睡眠 ${formatTime(sleep)}（6時間未満）</strong>：厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。認知機能・感情コントロールが著しく低下します。</div>
         <div style="margin-top:6px">・<strong>${workLabel}</strong>：${workDesc}</div>
       </div>`;
   } else if (issues.includes('sleep-critical')) {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 睡眠不足（${sleep.toFixed(1)}時間）</strong><br>
+        <strong>🔴 改善必要 — 睡眠不足（${formatTime(sleep)}）</strong><br>
         厚生労働省「健康づくりのための睡眠ガイド2023」では成人に<strong>6時間以上（推奨7時間以上）</strong>を推奨。睡眠6時間未満が続くと、認知機能・感情コントロール・記憶力が著しく低下します。まず睡眠時間の確保を優先してください。
       </div>`;
   } else if (workIssue === 'work-karoshi') {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 仕事時間過剰（${workAvail.toFixed(1)}時間 ／ 過労死ライン超）</strong><br>
+        <strong>🔴 改善必要 — 仕事時間過剰（${formatTime(workAvail)} ／ 過労死ライン超）</strong><br>
         文科省が示す教員の「過労死ライン」は月80時間超（1日換算で約11時間以上）です。この状態が続くと深刻な健康リスクがあります。業務の削減・分担・外注を早急に検討してください。
       </div>`;
   } else if (workIssue === 'work-over') {
     alertEl.innerHTML = `
       <div class="alert-box">
-        <strong>🔴 改善必要 — 仕事時間過剰（${workAvail.toFixed(1)}時間）</strong><br>
+        <strong>🔴 改善必要 — 仕事時間過剰（${formatTime(workAvail)}）</strong><br>
         仕事時間が10時間以上になっています。過労死ライン（11時間以上）に近づいています。業務の見直しや分担を検討してください。
       </div>`;
   } else if (issues.includes('sleep-warn')) {
     alertEl.innerHTML = `
       <div class="warn-box">
-        <strong>🟡 改善必要 — 睡眠がやや不足（${sleep.toFixed(1)}時間）</strong><br>
+        <strong>🟡 改善必要 — 睡眠がやや不足（${formatTime(sleep)}）</strong><br>
         最低基準（6時間）はクリアしていますが、推奨の<strong>7時間以上</strong>を下回っています。睡眠負債が蓄積しやすい状態です。業務削減で就寝時間を早めることを検討してください。
       </div>`;
   } else {
     alertEl.innerHTML = `
       <div class="ok-box">
-        <strong>🟢 バランス良好　睡眠 ${sleep.toFixed(1)}h ／ 仕事 ${workAvail.toFixed(1)}h</strong><br>
+        <strong>🟢 バランス良好 睡眠 ${formatTime(sleep)} ／ 仕事 ${formatTime(Math.max(0, workAvail))}</strong><br>
         睡眠7時間以上・仕事11時間以内を確保できています。適切な時間設計です。
       </div>`;
   }
