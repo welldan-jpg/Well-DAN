@@ -49,7 +49,7 @@
   .tabs {
     display: flex;
     gap: 4px;
-    max-width: 960px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 16px 20px 0;
     overflow-x: auto;
@@ -70,7 +70,7 @@
   .tabs button.active { background: var(--surface); color: var(--text); font-weight: 700; }
 
   /* ===== MAIN ===== */
-  .main { max-width: 960px; margin: 0 auto; padding: 0 20px 48px; }
+  .main { max-width: 1100px; margin: 0 auto; padding: 0 20px 48px; }
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -86,13 +86,15 @@
   }
   .lead { font-size: 13px; color: var(--text-muted); line-height: 1.9; margin-bottom: 16px; }
 
-  .tip-box, .warn-box, .danger-box {
+  .tip-box, .warn-box, .danger-box, .ok-box {
     padding: 11px 16px; font-size: 12.5px; line-height: 1.8; margin: 12px 0;
     border-radius: 0 6px 6px 0;
   }
   .tip-box    { background: #e8f0fb; border-left: 3px solid var(--accent2); color: #2c4a72; }
   .warn-box   { background: #fbf4e3; border-left: 3px solid var(--accent-warn); color: #6b5317; }
   .danger-box { background: #fbe8eb; border-left: 3px solid var(--accent3); color: #7a1f2d; }
+  .ok-box     { background: #e3f3ec; border-left: 3px solid var(--accent4); color: #1d6b49; }
+  [hidden] { display: none !important; }
 
   /* ===== FORM ===== */
   .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
@@ -111,8 +113,9 @@
   .btn:hover { filter: brightness(0.97); }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
   .btn.blue    { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .btn.green   { background: var(--accent4); border-color: var(--accent4); color: #fff; font-weight: 700; }
   .btn.danger  { color: var(--accent3); border-color: #e6b8bf; background: #fff; }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn:disabled, .btn.disabled { opacity: .5; cursor: not-allowed; }
 
   /* ===== TABLES ===== */
   .table-wrap { overflow-x: auto; }
@@ -135,9 +138,15 @@
     width: 34px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
     background: var(--surface); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer;
   }
-  .chip.done   { background: #e3f3ec; border-color: var(--accent4); color: #1d6b49; }
-  .chip.absent { background: var(--surface2); color: var(--text-dim); text-decoration: line-through; }
+  .chip.done    { background: #e3f3ec; border-color: var(--accent4); color: #1d6b49; }
+  .chip.pending { background: #fbf4e3; border-color: var(--accent-warn); color: #6b5317; font-weight: 700; }
+  .chip.absent  { background: var(--surface2); color: var(--text-dim); text-decoration: line-through; }
   .chip.current { outline: 2px solid var(--accent); }
+  .legend { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+  .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; border: 1px solid var(--border); }
+  .legend .l-done::before { background: #e3f3ec; border-color: var(--accent4); }
+  .legend .l-pending::before { background: #fbf4e3; border-color: var(--accent-warn); }
+  .legend .l-absent::before { background: var(--surface2); }
 
   .mark-btn {
     width: 44px; height: 38px; font-size: 20px; font-weight: 900; border-radius: 8px;
@@ -145,34 +154,57 @@
   }
   .mark-btn.o.on { background: var(--accent4); border-color: var(--accent4); color: #fff; }
   .mark-btn.x.on { background: var(--accent3); border-color: var(--accent3); color: #fff; }
+  .mark-btn:disabled { cursor: not-allowed; }
   tr.uncertain td { background: #fbf4e3; }
-  .badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+  .badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px; white-space: nowrap; }
   .badge.ai { background: #e8f0fb; color: #2c4a72; }
   .badge.check { background: var(--accent-warn); color: #fff; }
+  .badge.err { background: #fbe8eb; color: #7a1f2d; }
+  .badge.ok { background: #e3f3ec; color: #1d6b49; }
 
-  details.ai-panel {
-    border: 1px dashed var(--border); border-radius: 8px; padding: 12px 16px; margin: 16px 0;
+  .review-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 12px; }
+  .review-grid.has-photo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #photoView { position: sticky; top: 8px; align-self: start; }
+  #photoView img {
+    display: block; width: 100%; max-height: 78vh; object-fit: contain;
+    border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); cursor: zoom-in;
   }
-  details.ai-panel summary { cursor: pointer; font-weight: 700; font-size: 14px; }
-  .canvas-wrap { margin-top: 10px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface2); }
-  canvas#cv { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+  #photoView.zoom img { max-height: none; cursor: zoom-out; }
+
+  /* ===== BATCH ===== */
+  .canvas-wrap { margin-top: 10px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface2); max-width: 520px; }
+  canvas#maskCv { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+  img.thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); display: block; cursor: pointer; }
+  .steps { counter-reset: step; }
+  .step { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 14px 0; }
+  .step > h4 { font-size: 14px; margin-bottom: 6px; }
+  .step > h4::before {
+    counter-increment: step; content: counter(step);
+    display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px;
+    border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px;
+  }
+  progress { width: 100%; height: 10px; }
 
   /* ===== STATS ===== */
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-  .stat {
-    background: var(--surface2); border-radius: 8px; padding: 12px;
-  }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat { background: var(--surface2); border-radius: 8px; padding: 12px; }
   .stat .k { font-size: 11px; color: var(--text-muted); }
   .stat .v { font-size: 24px; font-weight: 900; font-family: 'DM Mono', monospace; }
   .bar { height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; min-width: 80px; }
   .bar > span { display: block; height: 100%; }
   .hints li { margin: 8px 0 8px 20px; font-size: 13px; line-height: 1.8; }
   .muted { color: var(--text-muted); font-size: 12px; }
+  .final-box { border: 2px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 20px; }
+  .final-box.done { border-color: var(--accent4); background: #f3faf6; }
 
   .guide p, .guide li { font-size: 13px; line-height: 1.9; }
   .guide ul, .guide ol { margin: 6px 0 6px 22px; }
   .guide h4 { font-size: 14px; margin: 18px 0 6px; }
 
+  @media (max-width: 800px) {
+    .review-grid.has-photo { grid-template-columns: minmax(0, 1fr); }
+    #photoView { position: static; }
+  }
   @media (max-width: 640px) {
     .header { padding: 14px 16px; }
     .tabs { padding: 12px 16px 0; }
@@ -194,16 +226,17 @@
 
 <nav class="tabs" role="tablist">
   <button data-tab="key" class="active">① 正答表</button>
-  <button data-tab="mark">② 丸つけ</button>
-  <button data-tab="stats">③ 集計・指導ヒント</button>
-  <button data-tab="guide">④ 安全な使い方</button>
+  <button data-tab="batch">② 写真を取り込む</button>
+  <button data-tab="mark">③ 確認・丸つけ</button>
+  <button data-tab="stats">④ 集計・評価確定</button>
+  <button data-tab="guide">⑤ 安全な使い方</button>
 </nav>
 
 <div class="main">
 
   <!-- ===== ① 正答表 ===== -->
   <section class="panel" id="tab-key">
-    <h2>正答表をつくる</h2>
+    <h2>正答表（採点基準）をつくる</h2>
     <p class="lead">一問一答なら「採点基準」＝正答表です。別解は <code>|</code> で区切ります（例：<code>4|四</code>）。正答表は書き出して校内で共有すると、先生ごとの採点のブレを防げます。</p>
 
     <div class="row">
@@ -232,6 +265,16 @@
     </div>
 
     <div class="row">
+      <label class="field">評価A（よくできた）：得点率
+        <span><input type="number" id="evalA" min="0" max="100" style="width:72px"> ％以上</span>
+      </label>
+      <label class="field">評価B（おおむねできた）：得点率
+        <span><input type="number" id="evalB" min="0" max="100" style="width:72px"> ％以上</span>
+      </label>
+      <span class="muted" style="align-self:flex-end">それ未満は C（もう少し）</span>
+    </div>
+
+    <div class="row">
       <button class="btn primary" id="btnSaveKey">正答表を保存</button>
       <button class="btn" id="btnExportKey">正答表を書き出す（共有用）</button>
       <label class="btn">正答表を読み込む<input type="file" id="importKey" accept=".json,application/json" hidden></label>
@@ -239,10 +282,89 @@
     <p class="muted">観点タグの例：「送り仮名」「くり上がり」「同音異字」。集計で、どの観点でつまずいているかが分かります。正答表は個人情報を含まないので、この端末のブラウザに保存されます。</p>
   </section>
 
-  <!-- ===== ② 丸つけ ===== -->
+  <!-- ===== ② 写真を取り込む ===== -->
+  <section class="panel" id="tab-batch" hidden>
+    <h2>写真をまとめて取り込む</h2>
+    <p class="lead">Google Classroom で集めた答案の写真をまとめて選び、出席番号に割り当てます。AIで一括読み取りすると、③で写真と読み取り結果を並べて確認できます。AIを使わず、写真を見ながら手で丸つけすることもできます。</p>
+
+    <div class="steps">
+      <div class="step">
+        <h4>写真をまとめて選ぶ</h4>
+        <p class="muted">Classroom の提出物は、Googleドライブの <code>マイドライブ / Classroom / （クラス名） / （課題名）</code> にあります。選ぶ画面で Ctrl+A（Mac は ⌘+A）を押すと全部選べます。写真はこの画面の中だけで扱い、端末やブラウザには保存しません。</p>
+        <div class="row">
+          <label class="btn blue">写真をまとめて選ぶ<input type="file" id="batchFiles" accept="image/*" multiple hidden></label>
+          <button class="btn danger" id="btnBatchClear">取り込んだ写真をすべて外す</button>
+          <span class="muted" id="batchCount"></span>
+        </div>
+      </div>
+
+      <div class="step">
+        <h4>出席番号を割り当てる</h4>
+        <p class="muted">Classroom はふつう名前順に並ぶので、番号は必ず確かめてください。答案に出席番号の欄があれば、AIに番号も読ませることができます（読んだ番号が割り当てと違うときは③で警告します）。</p>
+        <div class="row">
+          <label class="field">はじめの番号
+            <input type="number" id="startNo" min="1" max="60" value="1">
+          </label>
+          <button class="btn" id="btnRenumber">ファイル名の順に番号を振る</button>
+          <label style="font-size:13px"><input type="checkbox" id="readNo"> 答案に書かれた出席番号もAIに読ませる</label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>写真</th><th>ファイル名</th><th>出席番号</th><th>状態</th></tr></thead>
+            <tbody id="batchBody"><tr><td colspan="4" class="muted">まだ写真がありません</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="step">
+        <h4>AIを使わない場合：写真だけ割り当てる</h4>
+        <p class="muted">外部には何も送りません。③で写真を横に表示しながら、先生が○×を付けます。</p>
+        <button class="btn green" id="btnAssignOnly">写真を割り当てて ③ へ</button>
+      </div>
+
+      <div class="step">
+        <h4>AIで一括読み取りする場合（任意）</h4>
+        <div class="danger-box">
+          <strong>送信前に必ず確認：</strong>写真は Google の Gemini API に送られます。<strong>無料枠では、送った内容が Google のサービス改善に使われ、人が閲覧する可能性があります。</strong>
+          Classroom の写真は学校の Google Workspace の中にありますが、ここで送ると<strong>学校の契約の外</strong>に出ます。学校・教育委員会の情報セキュリティポリシーで認められている場合だけ使ってください。
+        </div>
+        <label class="row" style="font-size:13px"><input type="checkbox" id="aiConsent"> 上記を理解し、所属の許可を得ています</label>
+
+        <p style="font-size:13px;margin-top:8px"><strong>氏名欄の塗りつぶし（全部の写真に共通）</strong></p>
+        <p class="muted">下の写真の上をドラッグして、氏名の位置を黒く塗ります。同じ位置がすべての写真に適用されます（撮影情報・位置情報も自動で消えます）。写真ごとに位置がずれる場合は、<strong>氏名を書く欄のない用紙（出席番号だけ）にする</strong>のが確実です。一覧の写真を押すと、その写真で位置を確かめられます。</p>
+        <div class="row">
+          <button class="btn" id="btnUndoMask">塗りつぶしを1つ戻す</button>
+          <button class="btn" id="btnClearMask">塗りつぶしを全部消す</button>
+          <span class="muted" id="maskInfo"></span>
+        </div>
+        <div class="canvas-wrap" id="maskWrap" hidden><canvas id="maskCv"></canvas></div>
+
+        <div class="row">
+          <label class="field" style="flex:1 1 220px">Gemini APIキー（保存されません）
+            <input type="password" id="apiKey" autocomplete="off" placeholder="AIza...">
+          </label>
+          <label class="field">モデル
+            <input type="text" id="aiModel" value="gemini-2.5-flash">
+          </label>
+          <label class="field">送信の間隔（秒）
+            <input type="number" id="aiInterval" min="0" max="120" value="7" style="width:80px">
+          </label>
+        </div>
+        <p class="muted">無料枠は1分あたりの回数に上限があるため、1枚ずつ間をあけて送ります。AIには<strong>正答を渡さず「書いてある通りに書き起こす」だけ</strong>を頼み、○×はこのアプリが正答表と照合して判定します（AIが誤字を正しい字に“補正”して読むのを防ぐため）。</p>
+        <div class="row">
+          <button class="btn primary" id="btnBatchRun">一括読み取りを開始</button>
+          <button class="btn" id="btnBatchStop" disabled>中止</button>
+        </div>
+        <progress id="batchProgress" value="0" max="1" hidden></progress>
+        <div class="muted" id="batchStatus"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ③ 確認・丸つけ ===== -->
   <section class="panel" id="tab-mark" hidden>
-    <h2>丸つけ</h2>
-    <p class="lead">子どもは<strong>出席番号だけ</strong>で扱います（氏名は入力しません）。最速は「全部○」→ 間違いだけ × をタップ。答えを入力すると自動で○×を判定します。</p>
+    <h2>確認・丸つけ</h2>
+    <p class="lead">子どもは<strong>出席番号だけ</strong>で扱います。AIの読み取り結果は<strong>先生が確認して「確認して保存」を押すまで確定しません</strong>。手で丸つけするときは「全部○」→ 間違いだけ × が最速です。</p>
 
     <div class="row">
       <label class="field">テスト
@@ -251,11 +373,15 @@
       <label class="field">クラスの人数
         <input type="number" id="classSize" min="1" max="60" value="35">
       </label>
+      <button class="btn" id="btnNextPending">次の「未確認」へ</button>
     </div>
 
     <div class="chips" id="chips"></div>
+    <div class="legend"><span class="l-done">確認済み</span><span class="l-pending">AI読取・未確認</span><span class="l-absent">未提出</span></div>
 
-    <div class="student-bar">
+    <div id="markNotice"></div>
+
+    <div class="student-bar" style="margin-top:12px">
       <button class="btn" id="btnPrev">◀</button>
       <div><div class="muted">出席番号</div><div class="student-no" id="studentNo">1</div></div>
       <button class="btn" id="btnNext">▶</button>
@@ -265,49 +391,30 @@
       <button class="btn" id="btnAbsent">未提出にする</button>
     </div>
 
-    <details class="ai-panel" id="aiPanel">
-      <summary>📷 写真からAIで読み取る（任意・既定はオフ）</summary>
-      <div class="danger-box">
-        <strong>送信前に必ず確認：</strong>画像は Google の Gemini API に送られます。<strong>無料枠では、送った内容が Google のサービス改善に使われ、人が閲覧する可能性があります。</strong>
-        学校・教育委員会の情報セキュリティポリシーで外部AIの利用が認められている場合だけ使ってください。氏名欄は下の画像上をドラッグして黒く塗りつぶしてから送ります（位置情報などの撮影情報は自動で削除されます）。
+    <div class="review-grid" id="reviewGrid">
+      <div id="photoView" hidden>
+        <img id="photoImg" alt="この子の答案の写真">
+        <div class="muted" id="photoName" style="margin-top:4px"></div>
       </div>
-      <label class="row" style="font-size:13px"><input type="checkbox" id="aiConsent"> 上記を理解し、所属の許可を得ています</label>
-      <div class="row">
-        <label class="field" style="flex:1 1 220px">Gemini APIキー（保存されません）
-          <input type="password" id="apiKey" autocomplete="off" placeholder="AIza...">
-        </label>
-        <label class="field">モデル
-          <input type="text" id="aiModel" value="gemini-2.5-flash">
-        </label>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>問</th><th>正答</th><th>子どもの答え</th><th>判定</th></tr></thead>
+          <tbody id="markBody"></tbody>
+        </table>
       </div>
-      <div class="row">
-        <label class="btn blue">答案を撮影・選択<input type="file" id="photo" accept="image/*" capture="environment" hidden></label>
-        <button class="btn" id="btnUndoMask">塗りつぶしを1つ戻す</button>
-        <button class="btn primary" id="btnAiRead">塗りつぶして読み取り</button>
-      </div>
-      <p class="muted">AIには<strong>正答を渡さず「書いてある通りに書き起こす」だけ</strong>を頼み、○×はこのアプリが正答表と照合して判定します（AIが誤字を正しい字に“補正”して読むのを防ぐため）。自信のない読み取りは黄色で表示し、先生の確認が必要です。</p>
-      <div id="aiStatus" class="muted"></div>
-      <div class="canvas-wrap" id="canvasWrap" hidden><canvas id="cv"></canvas></div>
-    </details>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>問</th><th>正答</th><th>子どもの答え（任意）</th><th>判定</th></tr></thead>
-        <tbody id="markBody"></tbody>
-      </table>
     </div>
 
     <div class="row">
-      <button class="btn primary" id="btnSaveNext">保存して次の子へ</button>
+      <button class="btn primary" id="btnSaveNext">確認して保存 → 次へ</button>
       <span class="muted" id="markScore"></span>
     </div>
-    <div class="warn-box">丸つけ結果は<strong>この画面を閉じると消えます</strong>（共有PCに子どものデータを残さないため）。終わったら「③ 集計」から CSV に書き出し、学校指定の保存場所に保存してください。続きをやるときは CSV を読み込めます。</div>
+    <div class="warn-box">丸つけ結果と写真は<strong>この画面を閉じると消えます</strong>（共有PCに子どものデータを残さないため）。終わったら「④ 集計」から CSV に書き出し、学校指定の保存場所に保存してください。続きをやるときは CSV を読み込めます。</div>
   </section>
 
-  <!-- ===== ③ 集計 ===== -->
+  <!-- ===== ④ 集計・評価確定 ===== -->
   <section class="panel" id="tab-stats" hidden>
-    <h2>集計・指導ヒント</h2>
-    <p class="lead">集計とヒントはすべてこの端末の中で計算します（AIには送りません）。</p>
+    <h2>集計・評価確定</h2>
+    <p class="lead">集計とヒントはすべてこの端末の中で計算します（AIには送りません）。AI読取で未確認の子は集計に含まれません。</p>
     <div class="row">
       <label class="field">テスト
         <select id="statsTestSelect"></select>
@@ -328,34 +435,44 @@
 
     <h3>子ども別</h3>
     <div class="table-wrap"><table>
-      <thead><tr><th class="num">番号</th><th class="num">得点</th><th>×の問題</th></tr></thead>
+      <thead><tr><th class="num">番号</th><th class="num">得点</th><th>評価</th><th>×の問題</th></tr></thead>
       <tbody id="sStatsBody"></tbody>
     </table></div>
+
+    <div class="final-box" id="finalBox"></div>
 
     <div class="row" style="margin-top:16px">
       <button class="btn primary" id="btnExportCsv">結果をCSVで書き出す</button>
       <button class="btn" id="btnExportQCsv">問題別集計をCSVで書き出す</button>
-      <label class="btn">結果CSVを読み込む（続きから）<input type="file" id="importCsv" accept=".csv,text/csv" hidden></label>
+      <label class="btn" id="lblImportCsv">結果CSVを読み込む（続きから）<input type="file" id="importCsv" accept=".csv,text/csv" hidden></label>
       <button class="btn danger" id="btnClearResults">このテストの結果を消去</button>
     </div>
     <p class="muted">CSV は Excel・Googleスプレッドシート・校務支援システムの取り込み機能でそのまま開けます（文字コード UTF-8 BOM付き）。</p>
   </section>
 
-  <!-- ===== ④ 安全な使い方 ===== -->
+  <!-- ===== ⑤ 安全な使い方 ===== -->
   <section class="panel guide" id="tab-guide" hidden>
     <h2>安全な使い方</h2>
+    <h4>1回の流れ</h4>
+    <ol>
+      <li><strong>① 正答表</strong>：宿題を出したら正答と評価の目安を入れる（学年で共有すると採点がそろう）。</li>
+      <li><strong>② 写真を取り込む</strong>：Classroom の写真をまとめて選び、出席番号を割り当てる。AIで一括読み取り（許可がある場合のみ）か、写真だけ割り当て。</li>
+      <li><strong>③ 確認・丸つけ</strong>：写真と結果を見比べ、黄色の「要確認」を直して「確認して保存」。全員ぶんくり返す。</li>
+      <li><strong>④ 集計・評価確定</strong>：ヒントを見て、「評価を確定する」。CSV を書き出して学校指定の場所へ保存。</li>
+    </ol>
     <h4>このアプリの設計方針</h4>
     <ul>
       <li>子どもは出席番号だけで扱い、氏名は入力しません。</li>
-      <li>丸つけ結果はブラウザのメモリ上だけにあり、ページを閉じると消えます。保存は先生がCSVを書き出して、学校指定の場所に置きます。</li>
-      <li>外部への送信は「写真からAIで読み取る」を先生が自分でオンにしたときだけです。それ以外は通信しません（フォントの読み込みを除く）。</li>
-      <li>○×の判定・集計・指導ヒントは、すべて正答表との照合で決まります。同じ答えには必ず同じ判定が出るので、採点のブレがありません。</li>
+      <li>写真と丸つけ結果はブラウザのメモリ上だけにあり、ページを閉じると消えます。保存は先生がCSVを書き出して、学校指定の場所に置きます。</li>
+      <li>外部への送信は「AIで一括読み取り」を先生が自分で開始したときだけです。それ以外は通信しません（フォントの読み込みを除く）。</li>
+      <li>○×の判定・集計・評価・指導ヒントは、すべて正答表との照合で決まります。同じ答えには必ず同じ判定が出るので、採点のブレがありません。</li>
+      <li>AIの結果は「下書き」です。先生が確認して保存したものだけが集計され、「評価を確定」すると書き換えできなくなります（解除も可能）。</li>
     </ul>
     <h4>AI読み取りを使う前に</h4>
     <ol>
       <li><strong>所属の許可</strong>：自治体の教育情報セキュリティポリシーで、外部の生成AIに答案画像を送ってよいか、管理職・教育委員会に確認してください。</li>
       <li><strong>無料枠の扱い</strong>：Gemini API の無料枠では、送った内容が Google の製品改善に使われ、人のレビュー対象になり得ます。子どもの答案（筆跡も個人に結びつく情報です）を送るなら、有料枠（Vertex AI など）か、学校が契約する Google Workspace for Education の Gemini（学習に使われない契約）を選ぶのが安全です。</li>
-      <li><strong>写すのは解答欄だけ</strong>：氏名・番号欄は写さないか、黒く塗りつぶしてください。</li>
+      <li><strong>氏名を写さない</strong>：氏名欄のない用紙（出席番号だけ）にするか、塗りつぶしてください。</li>
       <li><strong>最後は先生の目で</strong>：特に低学年や習いたての漢字は誤読があります。黄色の「要確認」は必ず見てください。</li>
     </ol>
     <h4>とめ・はね・はらいについて</h4>
@@ -371,18 +488,24 @@
   const $  = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   const STORE_KEY = 'marutsuke.tests.v1';
   const TYPES = ['漢字', '計算', '語句', 'その他'];
+  const MAX_SIDE = 1600;               // 送信する画像の長辺（px）
 
   // ===== 状態 =====
   // tests: 正答表（個人情報なし）→ localStorage
-  // results: 丸つけ結果（子どものデータ）→ メモリのみ
+  // それ以外（子どものデータ・写真）→ メモリのみ
   let tests = loadTests();
   let currentId = tests[0]?.id ?? null;
-  const results = {};          // { testId: { [no]: { absent, answers[], marks[], flags[] } } }
+  const results = {};   // 先生が確認した結果 { testId: { [no]: { absent, answers[], marks[] } } }
+  const pending = {};   // AI読取・未確認     { testId: { [no]: { answers[], marks[], flags[], warn } } }
+  const photos  = {};   // 割り当てた写真     { testId: { [no]: { url, name } } }
+  const finals  = {};   // 評価確定の日時     { testId: '2026/10/26 13:30' }
+  let batch = [];       // 取り込んだ写真 [{ id, url, name, no, status, msg }]
   let studentNo = 1;
-  let draft = null;            // 入力中の子どもの { answers, marks, flags }
+  let draft = null;     // 入力中の子どもの { answers, marks, flags, dirty }
   let unsavedResults = false;
 
   function loadTests() {
@@ -399,6 +522,7 @@
     return {
       id: 't' + Date.now(),
       name: 'サンプル：3年 計算と漢字',
+      evalA: 80, evalB: 50,
       questions: [
         { ans: '56', type: '計算', pts: 1, tag: 'かけ算' },
         { ans: '112', type: '計算', pts: 1, tag: 'くり上がり' },
@@ -409,9 +533,11 @@
     };
   }
   const curTest = () => tests.find((t) => t.id === currentId) || null;
-  const resOf = (id) => (results[id] ||= {});
+  const bucket = (store, id) => (store[id] ||= {});
+  const resOf = (id) => bucket(results, id);
+  const isFinal = () => !!finals[currentId];
 
-  // ===== 正誤判定 =====
+  // ===== 正誤判定・評価 =====
   // 全角→半角などを揃え、空白を除いて比較。数値どうしは値で比較（0.50 と .5 を同じに）
   function norm(s) {
     return String(s ?? '').normalize('NFKC').replace(/\s+/g, '').replace(/[ー－‐−]/g, '-').toLowerCase();
@@ -425,13 +551,26 @@
   const isNum = (s) => /^-?(\d+\.?\d*|\.\d+)$/.test(s);
   const showKey = (k) => String(k ?? '').split(/[|｜]/).join(' / ');
 
+  function scoreOf(t, marks) {
+    let got = 0, full = 0;
+    t.questions.forEach((q, i) => { full += q.pts; if (marks[i] === 'o') got += q.pts; });
+    return { got, full };
+  }
+  function gradeOf(t, got, full) {
+    if (!full) return '';
+    const p = (got / full) * 100;
+    return p >= (t.evalA ?? 80) ? 'A' : p >= (t.evalB ?? 50) ? 'B' : 'C';
+  }
+
   // ===== タブ =====
-  $$('.tabs button').forEach((b) => b.addEventListener('click', () => {
-    $$('.tabs button').forEach((x) => x.classList.toggle('active', x === b));
-    $$('.panel').forEach((p) => { p.hidden = p.id !== 'tab-' + b.dataset.tab; });
-    if (b.dataset.tab === 'mark') renderMark();
-    if (b.dataset.tab === 'stats') renderStats();
-  }));
+  function showTab(name) {
+    $$('.tabs button').forEach((x) => x.classList.toggle('active', x.dataset.tab === name));
+    $$('.panel').forEach((p) => { p.hidden = p.id !== 'tab-' + name; });
+    if (name === 'mark') renderMark();
+    if (name === 'stats') renderStats();
+    if (name === 'batch') { renderBatch(); paintMask(); }
+  }
+  $$('.tabs button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
   function fillTestSelects() {
     for (const sel of ['#testSelect', '#markTestSelect', '#statsTestSelect']) {
@@ -444,7 +583,7 @@
       if (!confirmLeaveDraft()) { e.target.value = currentId; return; }
       currentId = e.target.value;
       studentNo = 1; draft = null;
-      fillTestSelects(); renderKey(); renderMark(); renderStats();
+      fillTestSelects(); renderKey(); renderMark(); renderStats(); renderBatch();
     });
   }
 
@@ -454,6 +593,8 @@
     if (!t) return;
     $('#testName').value = t.name;
     $('#qCount').value = t.questions.length;
+    $('#evalA').value = t.evalA ?? 80;
+    $('#evalB').value = t.evalB ?? 50;
     $('#keyBody').innerHTML = t.questions.map((q, i) => `
       <tr>
         <td class="num">${i + 1}</td>
@@ -466,18 +607,23 @@
   function readKeyForm() {
     const t = curTest();
     t.name = $('#testName').value.trim() || '(無題)';
+    const clamp = (v, d) => Math.min(100, Math.max(0, Number.isFinite(+v) && v !== '' ? +v : d));
+    t.evalA = clamp($('#evalA').value, 80);
+    t.evalB = Math.min(t.evalA, clamp($('#evalB').value, 50));
     $$('#keyBody [data-k]').forEach((el) => {
       const q = t.questions[+el.dataset.i];
       q[el.dataset.k] = el.dataset.k === 'pts' ? Math.max(0, Number(el.value) || 0) : el.value.trim();
     });
   }
+  const hasData = (id) => Object.keys(resOf(id)).length || Object.keys(bucket(pending, id)).length;
   $('#btnApplyCount').addEventListener('click', () => {
     readKeyForm();
     const t = curTest();
     const n = Math.min(100, Math.max(1, Number($('#qCount').value) || 1));
-    if (n < t.questions.length && Object.keys(resOf(t.id)).length && !confirm('問題数を減らすと、丸つけ済みの結果とずれる可能性があります。続けますか？')) return;
+    if (n !== t.questions.length && hasData(t.id) && !confirm('問題数を変えると、丸つけ済みの結果とずれる可能性があります。続けますか？')) return;
     while (t.questions.length < n) t.questions.push({ ans: '', type: TYPES[0], pts: 1, tag: '' });
     t.questions.length = n;
+    draft = null;
     renderKey();
   });
   $('#btnSaveKey').addEventListener('click', () => {
@@ -487,7 +633,7 @@
   });
   $('#btnNewTest').addEventListener('click', () => {
     if (!confirmLeaveDraft()) return;
-    const t = { id: 't' + Date.now(), name: '新しいテスト', questions: Array.from({ length: 10 }, () => ({ ans: '', type: TYPES[0], pts: 1, tag: '' })) };
+    const t = { id: 't' + Date.now(), name: '新しいテスト', evalA: 80, evalB: 50, questions: Array.from({ length: 10 }, () => ({ ans: '', type: TYPES[0], pts: 1, tag: '' })) };
     tests.push(t); currentId = t.id; studentNo = 1; draft = null;
     saveTests(); fillTestSelects(); renderKey();
   });
@@ -495,7 +641,7 @@
     const t = curTest();
     if (!t || !confirm(`「${t.name}」を削除しますか？（このテストの丸つけ結果も消えます）`)) return;
     tests = tests.filter((x) => x.id !== t.id);
-    delete results[t.id];
+    dropTestData(t.id);
     if (!tests.length) tests.push(sampleTest());
     currentId = tests[0].id; draft = null;
     saveTests(); fillTestSelects(); renderKey();
@@ -503,7 +649,7 @@
   $('#btnExportKey').addEventListener('click', () => {
     readKeyForm();
     const t = curTest();
-    download(`${t.name}_正答表.json`, JSON.stringify({ format: 'marutsuke-key-v1', name: t.name, questions: t.questions }, null, 2), 'application/json');
+    download(`${t.name}_正答表.json`, JSON.stringify({ format: 'marutsuke-key-v1', name: t.name, evalA: t.evalA, evalB: t.evalB, questions: t.questions }, null, 2), 'application/json');
   });
   $('#importKey').addEventListener('change', async (e) => {
     const f = e.target.files[0]; e.target.value = '';
@@ -514,6 +660,8 @@
       const t = {
         id: 't' + Date.now(),
         name: String(d.name || '読み込んだテスト'),
+        evalA: Number.isFinite(+d.evalA) ? +d.evalA : 80,
+        evalB: Number.isFinite(+d.evalB) ? +d.evalB : 50,
         questions: d.questions.slice(0, 100).map((q) => ({
           ans: String(q.ans ?? ''), type: TYPES.includes(q.type) ? q.type : 'その他',
           pts: Math.max(0, Number(q.pts) || 0), tag: String(q.tag ?? ''),
@@ -524,17 +672,285 @@
     } catch (err) { alert('読み込めませんでした：' + err.message); }
   });
 
-  // ===== ② 丸つけ =====
+  // ===== ② 写真を取り込む =====
   const classSize = () => Math.min(60, Math.max(1, Number($('#classSize').value) || 35));
+  let batchSeq = 0, previewId = null, running = false, stopReq = false;
+
+  $('#batchFiles').addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []).sort((a, b) => a.name.localeCompare(b.name, 'ja', { numeric: true }));
+    e.target.value = '';
+    if (!files.length) return;
+    let next = Math.max(0, ...batch.map((b) => b.no || 0)) || (Number($('#startNo').value) || 1) - 1;
+    files.forEach((f) => {
+      next++;
+      batch.push({ id: ++batchSeq, url: URL.createObjectURL(f), name: f.name, no: next <= 60 ? next : null, status: 'wait', msg: '' });
+    });
+    if (!previewId) setPreview(batch[0].id);
+    renderBatch();
+  });
+  $('#btnRenumber').addEventListener('click', () => {
+    let n = Number($('#startNo').value) || 1;
+    batch.forEach((b) => { b.no = n <= 60 ? n : null; n++; });
+    renderBatch();
+  });
+  $('#btnBatchClear').addEventListener('click', () => {
+    if (running) return;
+    if (batch.length && !confirm('取り込んだ写真の一覧を外しますか？（③に割り当て済みの写真はそのまま残ります）')) return;
+    const kept = new Set(Object.values(photos).flatMap((p) => Object.values(p).map((x) => x.url)));
+    batch.forEach((b) => { if (!kept.has(b.url)) URL.revokeObjectURL(b.url); });
+    batch = []; setPreview(null); renderBatch();
+  });
+
+  function renderBatch() {
+    $('#batchCount').textContent = batch.length ? `${batch.length}枚` : '';
+    if (!batch.length) {
+      $('#batchBody').innerHTML = '<tr><td colspan="4" class="muted">まだ写真がありません</td></tr>';
+      return;
+    }
+    const dup = dupNos();
+    const label = { wait: '', reading: '<span class="badge ai">読み取り中…</span>', done: '<span class="badge ok">読取済</span>', error: '<span class="badge err">失敗</span>', assigned: '<span class="badge ok">割り当て済</span>' };
+    $('#batchBody').innerHTML = batch.map((b) => `
+      <tr>
+        <td><img class="thumb" src="${b.url}" data-preview="${b.id}" alt="" title="この写真で塗りつぶし位置を確かめる"></td>
+        <td style="word-break:break-all">${esc(b.name)}</td>
+        <td><input type="number" min="1" max="60" data-bno="${b.id}" value="${b.no ?? ''}" ${running ? 'disabled' : ''}>
+          ${b.no && dup.has(b.no) ? '<span class="badge err">番号が重複</span>' : ''}</td>
+        <td>${label[b.status] || ''} <span class="muted">${esc(b.msg)}</span></td>
+      </tr>`).join('');
+  }
+  function dupNos() {
+    const seen = new Set(), dup = new Set();
+    batch.forEach((b) => { if (b.no) { if (seen.has(b.no)) dup.add(b.no); seen.add(b.no); } });
+    return dup;
+  }
+  $('#batchBody').addEventListener('change', (e) => {
+    const el = e.target.closest('[data-bno]'); if (!el) return;
+    const b = batch.find((x) => x.id === +el.dataset.bno);
+    const v = Math.round(Number(el.value));
+    b.no = v >= 1 && v <= 60 ? v : null;
+    renderBatch();
+  });
+  $('#batchBody').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-preview]');
+    if (el) setPreview(+el.dataset.preview);
+  });
+
+  function checkBatchNumbers(allowEmpty) {
+    if (!batch.length) { alert('先に写真を選んでください。'); return false; }
+    if (dupNos().size) { alert('出席番号が重複している写真があります。番号を直してください。'); return false; }
+    if (!allowEmpty && batch.some((b) => !b.no)) { alert('出席番号が入っていない写真があります。'); return false; }
+    return true;
+  }
+
+  $('#btnAssignOnly').addEventListener('click', () => {
+    if (isFinal()) { alert('このテストは評価確定済みです。④で確定を解除してから取り込んでください。'); return; }
+    if (!checkBatchNumbers(false)) return;
+    const ph = bucket(photos, currentId);
+    batch.forEach((b) => { ph[b.no] = { url: b.url, name: b.name }; if (b.status !== 'done') b.status = 'assigned'; });
+    renderBatch();
+    draft = null;
+    studentNo = Math.min(...batch.map((b) => b.no));
+    showTab('mark');
+  });
+
+  // --- 共通の塗りつぶし（写真の大きさに対する割合で持つので、全部の写真に同じ位置で効く）---
+  const mcv = $('#maskCv'), mctx = mcv.getContext('2d');
+  let maskImg = null, masks = [], drag = null;
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = () => reject(new Error('画像を開けませんでした'));
+      im.src = url;
+    });
+  }
+  async function setPreview(id) {
+    previewId = id;
+    const b = batch.find((x) => x.id === id);
+    if (!b) { maskImg = null; $('#maskWrap').hidden = true; return; }
+    try {
+      maskImg = await loadImage(b.url);
+      const s = Math.min(1, 900 / Math.max(maskImg.naturalWidth, maskImg.naturalHeight));
+      mcv.width = Math.round(maskImg.naturalWidth * s);
+      mcv.height = Math.round(maskImg.naturalHeight * s);
+      $('#maskWrap').hidden = false;
+      paintMask();
+    } catch (err) { alert(err.message); }
+  }
+  function paintMask() {
+    $('#maskInfo').textContent = masks.length ? `塗りつぶし ${masks.length} か所` : '塗りつぶしなし';
+    if (!maskImg) return;
+    mctx.drawImage(maskImg, 0, 0, mcv.width, mcv.height);
+    mctx.fillStyle = '#000';
+    masks.forEach((m) => mctx.fillRect(m.x * mcv.width, m.y * mcv.height, m.w * mcv.width, m.h * mcv.height));
+    if (drag) {
+      mctx.fillStyle = 'rgba(0,0,0,.55)';
+      mctx.fillRect(drag.x * mcv.width, drag.y * mcv.height, drag.w * mcv.width, drag.h * mcv.height);
+    }
+  }
+  function relPt(e) {
+    const r = mcv.getBoundingClientRect();
+    return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
+  }
+  mcv.addEventListener('pointerdown', (e) => {
+    if (!maskImg) return;
+    mcv.setPointerCapture(e.pointerId);
+    const p = relPt(e); drag = { x: p.x, y: p.y, w: 0, h: 0, ox: p.x, oy: p.y };
+  });
+  mcv.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const p = relPt(e);
+    drag.x = Math.min(p.x, drag.ox); drag.y = Math.min(p.y, drag.oy);
+    drag.w = Math.abs(p.x - drag.ox); drag.h = Math.abs(p.y - drag.oy);
+    paintMask();
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.w > 0.01 && drag.h > 0.01) masks.push({ x: drag.x, y: drag.y, w: drag.w, h: drag.h });
+    drag = null; paintMask();
+  };
+  mcv.addEventListener('pointerup', endDrag);
+  mcv.addEventListener('pointercancel', endDrag);
+  $('#btnUndoMask').addEventListener('click', () => { masks.pop(); paintMask(); });
+  $('#btnClearMask').addEventListener('click', () => { masks = []; paintMask(); });
+
+  // 縮小＋塗りつぶし後の画素だけを JPEG に再エンコード（EXIF＝撮影日時・位置情報はここで落ちる）
+  function maskedJpegB64(img) {
+    const s = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * s);
+    c.height = Math.round(img.naturalHeight * s);
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0, c.width, c.height);
+    x.fillStyle = '#000';
+    masks.forEach((m) => x.fillRect(m.x * c.width, m.y * c.height, m.w * c.width, m.h * c.height));
+    return c.toDataURL('image/jpeg', 0.85).split(',')[1];
+  }
+
+  // --- Gemini 呼び出し ---
+  async function transcribe(b64, n, { key, model, readNo }) {
+    // 正答は渡さない：渡すとAIが正答に寄せて読んでしまう
+    const prompt = [
+      `これは小学生の一問一答の答案の画像です。問題は問1〜問${n}の${n}問です。`,
+      '各問について、子どもが実際に書いた答えを、書いてある通りに書き起こしてください。',
+      '重要：誤字・字形の誤り・送り仮名の誤りを、推測で正しい字に直さないでください。前後の文脈から補完しないでください。',
+      '判読できない、または自信がない場合は uncertain を true にし、読めた範囲を text に入れてください（全く読めなければ空文字）。',
+      '正誤の判定はしないでください。氏名は書き起こさないでください。',
+      readNo ? '答案に出席番号の欄があれば、その数字を studentNo に入れてください（なければ null）。' : 'studentNo は常に null にしてください。',
+      '出力は次の形のJSONのみ：{"studentNo":null,"answers":[{"q":1,"text":"...","uncertain":false}]}',
+    ].join('\n');
+    const body = JSON.stringify({
+      contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
+      generationConfig: { temperature: 0, responseMimeType: 'application/json' },
+    });
+    for (let attempt = 0; ; attempt++) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body,
+      });
+      if (res.status === 429 && attempt < 2) {   // 回数上限：少し待ってやり直す
+        $('#batchStatus').textContent = '無料枠の回数上限に達したため、30秒待ってやり直します…';
+        await sleep(30000);
+        continue;
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || '';
+      const parsed = JSON.parse(text.replace(/^```(?:json)?|```$/g, '').trim());
+      return { studentNo: parsed.studentNo, answers: Array.isArray(parsed.answers) ? parsed.answers : [] };
+    }
+  }
+  // AIの書き起こしを正答表と照合。自信のないもの・読めなかったものは○×を付けず「要確認」にする
+  function toDraftFromAi(t, list) {
+    const n = t.questions.length;
+    const d = { answers: Array(n).fill(''), marks: Array(n).fill(''), flags: Array(n).fill('check') };
+    list.forEach((a) => {
+      const i = Number(a.q) - 1;
+      if (!(i >= 0 && i < n)) return;
+      const txt = String(a.text ?? '').trim();
+      d.answers[i] = txt;
+      if (!a.uncertain && txt) { d.flags[i] = 'ai'; d.marks[i] = judge(txt, t.questions[i].ans); }
+    });
+    return d;
+  }
+
+  $('#btnBatchRun').addEventListener('click', async () => {
+    const t = curTest();
+    if (isFinal()) { alert('このテストは評価確定済みです。④で確定を解除してから読み取ってください。'); return; }
+    if (!$('#aiConsent').checked) { alert('送信前の確認事項にチェックを入れてください。'); return; }
+    const key = $('#apiKey').value.trim();
+    if (!key) { alert('APIキーを入力してください。'); return; }
+    const readNo = $('#readNo').checked;
+    if (!checkBatchNumbers(readNo)) return;
+    if (t.questions.some((q) => !q.ans) && !confirm('正答表に空欄の問題があります。続けますか？')) return;
+    if (!masks.length && !confirm('氏名欄の塗りつぶしがありません。写真に氏名が写っていないことを確認しましたか？')) return;
+    const todo = batch.filter((b) => b.status !== 'done');
+    if (!todo.length) { alert('すべて読み取り済みです。'); return; }
+    if (!confirm(`${todo.length}枚の写真を Gemini API に送って読み取ります。よろしいですか？`)) return;
+
+    const opts = { key, readNo, model: ($('#aiModel').value.trim() || 'gemini-2.5-flash').replace(/[^\w.\-]/g, '') };
+    const interval = Math.max(0, Number($('#aiInterval').value) || 0) * 1000;
+    running = true; stopReq = false;
+    $('#btnBatchRun').disabled = true; $('#btnBatchStop').disabled = false;
+    const prog = $('#batchProgress'); prog.hidden = false; prog.max = todo.length; prog.value = 0;
+    let ok = 0, ng = 0;
+
+    for (const [k, b] of todo.entries()) {
+      if (stopReq) break;
+      b.status = 'reading'; b.msg = ''; renderBatch();
+      $('#batchStatus').textContent = `${k + 1} / ${todo.length} 枚目を読み取り中…`;
+      try {
+        const out = await transcribe(maskedJpegB64(await loadImage(b.url)), t.questions.length, opts);
+        const aiNo = Math.round(Number(out.studentNo));
+        const aiNoOk = readNo && aiNo >= 1 && aiNo <= 60;
+        let warn = '';
+        if (!b.no && aiNoOk) {
+          if (batch.some((x) => x !== b && x.no === aiNo)) throw new Error(`AIが読んだ番号 ${aiNo} は他の写真と重複しています。番号を入れてやり直してください`);
+          b.no = aiNo;
+        } else if (aiNoOk && aiNo !== b.no) {
+          warn = `答案に書かれた出席番号は「${aiNo}」と読み取りました（割り当ては ${b.no}）。写真が別の子のものでないか確認してください。`;
+        }
+        if (!b.no) throw new Error('出席番号が分かりません。番号を入れてやり直してください');
+        bucket(pending, t.id)[b.no] = { ...toDraftFromAi(t, out.answers), warn };
+        bucket(photos, t.id)[b.no] = { url: b.url, name: b.name };
+        const unsure = bucket(pending, t.id)[b.no].flags.filter((f) => f === 'check').length;
+        b.status = 'done';
+        b.msg = `要確認 ${unsure}問` + (warn ? '・番号に注意' : '');
+        ok++;
+      } catch (err) {
+        b.status = 'error'; b.msg = err.message; ng++;
+      }
+      prog.value = k + 1;
+      renderBatch();
+      if (k < todo.length - 1 && !stopReq) await sleep(interval);
+    }
+
+    running = false;
+    $('#btnBatchRun').disabled = false; $('#btnBatchStop').disabled = true;
+    draft = null;
+    renderBatch();
+    $('#batchStatus').innerHTML = `${stopReq ? '中止しました。' : '終わりました。'}読み取り ${ok}枚、失敗 ${ng}枚。` +
+      (ok ? ' <button class="btn primary" id="goReview">③ で確認する</button>' : '');
+    $('#goReview')?.addEventListener('click', () => { gotoFirstPending(true); showTab('mark'); });
+  });
+  $('#btnBatchStop').addEventListener('click', () => { stopReq = true; $('#batchStatus').textContent = '今の1枚が終わったら止めます…'; });
+
+  // ===== ③ 確認・丸つけ =====
   $('#classSize').addEventListener('change', renderChips);
 
   function startDraft() {
     const t = curTest();
-    const saved = resOf(t.id)[studentNo];
     const n = t.questions.length;
-    draft = saved && !saved.absent
-      ? { answers: [...saved.answers], marks: [...saved.marks], flags: Array(n).fill('') }
-      : { answers: Array(n).fill(''), marks: Array(n).fill(''), flags: Array(n).fill('') };
+    const p = bucket(pending, t.id)[studentNo];
+    const saved = resOf(t.id)[studentNo];
+    if (p) draft = { answers: [...p.answers], marks: [...p.marks], flags: [...p.flags] };
+    else if (saved && !saved.absent) draft = { answers: [...saved.answers], marks: [...saved.marks], flags: Array(n).fill('') };
+    else draft = { answers: Array(n).fill(''), marks: Array(n).fill(''), flags: Array(n).fill('') };
     draft.dirty = false;
   }
   function confirmLeaveDraft() {
@@ -544,10 +960,10 @@
 
   function renderChips() {
     const t = curTest(); if (!t) return;
-    const r = resOf(t.id);
+    const r = resOf(t.id), p = bucket(pending, t.id);
     let html = '';
     for (let i = 1; i <= classSize(); i++) {
-      const cls = r[i] ? (r[i].absent ? 'absent' : 'done') : '';
+      const cls = p[i] ? 'pending' : r[i] ? (r[i].absent ? 'absent' : 'done') : '';
       html += `<button class="chip ${cls}${i === studentNo ? ' current' : ''}" data-no="${i}">${i}</button>`;
     }
     $('#chips').innerHTML = html;
@@ -558,33 +974,69 @@
   });
   function goTo(no) {
     if (no < 1 || no > classSize() || !confirmLeaveDraft()) return;
-    studentNo = no; draft = null; clearPhoto();
+    studentNo = no; draft = null;
     renderMark();
+  }
+  function gotoFirstPending(fromStart = false) {
+    const nos = Object.keys(bucket(pending, currentId)).map(Number).sort((a, b) => a - b);
+    if (nos.length) { studentNo = (fromStart ? null : nos.find((n) => n > studentNo)) ?? nos[0]; draft = null; }
+    return nos.length;
   }
   $('#btnPrev').addEventListener('click', () => goTo(studentNo - 1));
   $('#btnNext').addEventListener('click', () => goTo(studentNo + 1));
+  $('#btnNextPending').addEventListener('click', () => {
+    if (!confirmLeaveDraft()) return;
+    if (!gotoFirstPending()) alert('未確認の子はいません。');
+    renderMark();
+  });
 
   function renderMark() {
     const t = curTest(); if (!t) return;
     if (!draft || draft.answers.length !== t.questions.length) startDraft();
+    const fin = isFinal();
+    const p = bucket(pending, t.id)[studentNo];
+    const saved = resOf(t.id)[studentNo];
     $('#studentNo').textContent = studentNo;
     renderChips();
+
+    // 状態のお知らせ
+    const notes = [];
+    if (fin) notes.push(`<div class="ok-box">このテストは <strong>${esc(finals[t.id])} に評価確定</strong>しています。直すときは ④ で確定を解除してください。</div>`);
+    if (p) notes.push(`<div class="warn-box"><strong>AIの読み取り結果（未確認）</strong>です。写真と見比べ、黄色の「要確認」に○×を付けて「確認して保存」を押してください。</div>`);
+    if (p?.warn) notes.push(`<div class="danger-box">${esc(p.warn)}</div>`);
+    if (!p && saved?.absent) notes.push('<div class="tip-box">この子は「未提出」になっています。丸つけして保存すると提出扱いになります。</div>');
+    $('#markNotice').innerHTML = notes.join('');
+
+    // 写真
+    const ph = bucket(photos, t.id)[studentNo];
+    $('#photoView').hidden = !ph;
+    $('#reviewGrid').classList.toggle('has-photo', !!ph);
+    if (ph) {
+      if ($('#photoImg').getAttribute('src') !== ph.url) $('#photoImg').src = ph.url;
+      $('#photoName').textContent = `${ph.name}（押すと拡大）`;
+    } else {
+      $('#photoImg').removeAttribute('src');
+    }
+
+    const dis = fin ? ' disabled' : '';
     $('#markBody').innerHTML = t.questions.map((q, i) => `
       <tr class="${draft.flags[i] === 'check' ? 'uncertain' : ''}">
         <td class="num">${i + 1}</td>
         <td>${esc(showKey(q.ans)) || '<span class="muted">（未設定）</span>'}</td>
-        <td><input type="text" data-ai="${i}" value="${esc(draft.answers[i])}" placeholder="—">
+        <td><input type="text" data-ai="${i}" value="${esc(draft.answers[i])}" placeholder="—"${dis}>
           ${draft.flags[i] === 'ai' ? '<span class="badge ai">AI読取</span>' : ''}
           ${draft.flags[i] === 'check' ? '<span class="badge check">要確認</span>' : ''}</td>
         <td style="white-space:nowrap">
-          <button class="mark-btn o${draft.marks[i] === 'o' ? ' on' : ''}" data-mark="o" data-i="${i}" aria-label="問${i + 1} 正解">○</button>
-          <button class="mark-btn x${draft.marks[i] === 'x' ? ' on' : ''}" data-mark="x" data-i="${i}" aria-label="問${i + 1} 不正解">×</button>
+          <button class="mark-btn o${draft.marks[i] === 'o' ? ' on' : ''}" data-mark="o" data-i="${i}" aria-label="問${i + 1} 正解"${dis}>○</button>
+          <button class="mark-btn x${draft.marks[i] === 'x' ? ' on' : ''}" data-mark="x" data-i="${i}" aria-label="問${i + 1} 不正解"${dis}>×</button>
         </td>
       </tr>`).join('');
+    ['#btnAllO', '#btnAutoJudge', '#btnAbsent', '#btnSaveNext'].forEach((s) => { $(s).disabled = fin; });
     updateScore();
   }
+  $('#photoImg').addEventListener('click', () => $('#photoView').classList.toggle('zoom'));
   $('#markBody').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-mark]'); if (!b) return;
+    const b = e.target.closest('[data-mark]'); if (!b || isFinal()) return;
     const i = +b.dataset.i;
     draft.marks[i] = draft.marks[i] === b.dataset.mark ? '' : b.dataset.mark;
     if (draft.flags[i] === 'check') draft.flags[i] = 'ai'; // 先生が確認した
@@ -592,7 +1044,7 @@
     renderMark();
   });
   $('#markBody').addEventListener('change', (e) => {
-    const el = e.target.closest('[data-ai]'); if (!el) return;
+    const el = e.target.closest('[data-ai]'); if (!el || isFinal()) return;
     const i = +el.dataset.ai;
     draft.answers[i] = el.value.trim();
     draft.marks[i] = judge(draft.answers[i], curTest().questions[i].ans) || draft.marks[i];
@@ -601,7 +1053,9 @@
     renderMark();
   });
   $('#btnAllO').addEventListener('click', () => {
-    draft.marks = draft.marks.map(() => 'o'); draft.dirty = true; renderMark();
+    draft.marks = draft.marks.map(() => 'o');
+    draft.flags = draft.flags.map((f) => (f === 'check' ? 'ai' : f));
+    draft.dirty = true; renderMark();
   });
   $('#btnAutoJudge').addEventListener('click', () => {
     const qs = curTest().questions;
@@ -610,165 +1064,29 @@
   });
   $('#btnAbsent').addEventListener('click', () => {
     resOf(currentId)[studentNo] = { absent: true };
+    delete bucket(pending, currentId)[studentNo];
     unsavedResults = true; draft = null;
     goTo(Math.min(studentNo + 1, classSize())); renderMark();
   });
   $('#btnSaveNext').addEventListener('click', () => {
     const missing = draft.marks.map((m, i) => (m ? null : i + 1)).filter(Boolean);
     if (missing.length) { alert(`まだ○×が付いていない問題があります：問 ${missing.join(', ')}`); return; }
-    const checks = draft.flags.map((f, i) => (f === 'check' ? i + 1 : null)).filter(Boolean);
-    if (checks.length && !confirm(`AIの読み取りに自信がない問題があります（問 ${checks.join(', ')}）。答案を見て確認しましたか？`)) return;
+    const p = bucket(pending, currentId)[studentNo];
+    if (p?.warn && !confirm('出席番号の読み取りに食い違いがあります。写真がこの子のものであることを確認しましたか？')) return;
     resOf(currentId)[studentNo] = { absent: false, answers: [...draft.answers], marks: [...draft.marks] };
+    delete bucket(pending, currentId)[studentNo];
     unsavedResults = true;
-    draft = null; clearPhoto();
-    if (studentNo < classSize()) studentNo++;
+    draft = null;
+    if (!gotoFirstPending() && studentNo < classSize()) studentNo++;
     renderMark();
   });
-  function scoreOf(t, marks) {
-    let got = 0, full = 0;
-    t.questions.forEach((q, i) => { full += q.pts; if (marks[i] === 'o') got += q.pts; });
-    return { got, full };
-  }
   function updateScore() {
-    const { got, full } = scoreOf(curTest(), draft.marks);
-    $('#markScore').textContent = `この子の得点：${got} / ${full}`;
-  }
-
-  // ===== 写真 → 塗りつぶし → AI読み取り =====
-  const cv = $('#cv'), ctx = cv.getContext('2d');
-  const MAX_SIDE = 1600;               // 送信サイズを抑える
-  let img = null, masks = [], drag = null;
-
-  $('#photo').addEventListener('change', (e) => {
-    const f = e.target.files[0]; e.target.value = '';
-    if (!f) return;
-    const url = URL.createObjectURL(f);
-    const im = new Image();
-    im.onload = () => {
-      URL.revokeObjectURL(url);
-      img = im; masks = [];
-      const s = Math.min(1, MAX_SIDE / Math.max(im.naturalWidth, im.naturalHeight));
-      cv.width = Math.round(im.naturalWidth * s);
-      cv.height = Math.round(im.naturalHeight * s);
-      $('#canvasWrap').hidden = false;
-      $('#aiStatus').textContent = '氏名・番号の欄をドラッグして黒く塗りつぶしてください。';
-      paint();
-    };
-    im.onerror = () => { URL.revokeObjectURL(url); alert('画像を開けませんでした'); };
-    im.src = url;
-  });
-  function paint(withGuide = true) {
-    if (!img) return;
-    ctx.drawImage(img, 0, 0, cv.width, cv.height);
-    ctx.fillStyle = '#000';
-    masks.forEach((m) => ctx.fillRect(m.x, m.y, m.w, m.h));
-    if (withGuide && drag) {
-      ctx.fillStyle = 'rgba(0,0,0,.55)';
-      ctx.fillRect(drag.x, drag.y, drag.w, drag.h);
-    }
-  }
-  function canvasPt(e) {
-    const r = cv.getBoundingClientRect();
-    return { x: (e.clientX - r.left) * (cv.width / r.width), y: (e.clientY - r.top) * (cv.height / r.height) };
-  }
-  cv.addEventListener('pointerdown', (e) => {
-    if (!img) return;
-    cv.setPointerCapture(e.pointerId);
-    const p = canvasPt(e); drag = { x: p.x, y: p.y, w: 0, h: 0, ox: p.x, oy: p.y };
-  });
-  cv.addEventListener('pointermove', (e) => {
-    if (!drag) return;
-    const p = canvasPt(e);
-    drag.x = Math.min(p.x, drag.ox); drag.y = Math.min(p.y, drag.oy);
-    drag.w = Math.abs(p.x - drag.ox); drag.h = Math.abs(p.y - drag.oy);
-    paint();
-  });
-  const endDrag = () => {
-    if (!drag) return;
-    if (drag.w > 4 && drag.h > 4) masks.push({ x: drag.x, y: drag.y, w: drag.w, h: drag.h });
-    drag = null; paint();
-  };
-  cv.addEventListener('pointerup', endDrag);
-  cv.addEventListener('pointercancel', endDrag);
-  $('#btnUndoMask').addEventListener('click', () => { masks.pop(); paint(); });
-
-  function clearPhoto() {
-    img = null; masks = []; drag = null;
-    cv.width = cv.height = 0;
-    $('#canvasWrap').hidden = true;
-    $('#aiStatus').textContent = '';
-  }
-
-  $('#btnAiRead').addEventListener('click', async () => {
     const t = curTest();
-    if (!$('#aiConsent').checked) { alert('送信前の確認事項にチェックを入れてください。'); return; }
-    const key = $('#apiKey').value.trim();
-    if (!key) { alert('APIキーを入力してください。'); return; }
-    if (!img) { alert('先に答案を撮影・選択してください。'); return; }
-    if (!masks.length && !confirm('塗りつぶしがありません。画像に氏名や番号が写っていないことを確認しましたか？')) return;
+    const { got, full } = scoreOf(t, draft.marks);
+    $('#markScore').textContent = `この子の得点：${got} / ${full}（評価 ${gradeOf(t, got, full)}）`;
+  }
 
-    // 塗りつぶし後の画素だけを JPEG に再エンコード（EXIF＝撮影日時・位置情報はここで落ちる）
-    paint(false);
-    const b64 = cv.toDataURL('image/jpeg', 0.85).split(',')[1];
-    const model = ($('#aiModel').value.trim() || 'gemini-2.5-flash').replace(/[^\w.\-]/g, '');
-    const n = t.questions.length;
-    // 正答は渡さない：渡すとAIが正答に寄せて読んでしまう
-    const prompt = [
-      `これは小学生の一問一答の答案の画像です。問題は問1〜問${n}の${n}問です。`,
-      '各問について、子どもが実際に書いた答えを、書いてある通りに書き起こしてください。',
-      '重要：誤字・字形の誤り・送り仮名の誤りを、推測で正しい字に直さないでください。前後の文脈から補完しないでください。',
-      '判読できない、または自信がない場合は uncertain を true にし、読めた範囲を text に入れてください（全く読めなければ空文字）。',
-      '正誤の判定はしないでください。',
-      '出力は次の形のJSONのみ：{"answers":[{"q":1,"text":"...","uncertain":false}]}',
-    ].join('\n');
-
-    $('#btnAiRead').disabled = true;
-    $('#aiStatus').textContent = '読み取り中…';
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
-          generationConfig: { temperature: 0, responseMimeType: 'application/json' },
-        }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error?.message || `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || '';
-      const parsed = JSON.parse(text.replace(/^```(?:json)?|```$/g, '').trim());
-      const list = Array.isArray(parsed.answers) ? parsed.answers : [];
-      let filled = 0, unsure = 0;
-      list.forEach((a) => {
-        const i = Number(a.q) - 1;
-        if (!(i >= 0 && i < n)) return;
-        const txt = String(a.text ?? '').trim();
-        draft.answers[i] = txt;
-        if (a.uncertain || !txt) {
-          draft.flags[i] = 'check'; draft.marks[i] = ''; unsure++;
-        } else {
-          draft.flags[i] = 'ai'; draft.marks[i] = judge(txt, t.questions[i].ans);
-        }
-        filled++;
-      });
-      for (let i = 0; i < n; i++) {
-        if (!list.some((a) => Number(a.q) - 1 === i)) { draft.flags[i] = 'check'; draft.marks[i] = ''; unsure++; }
-      }
-      draft.dirty = true;
-      renderMark();
-      $('#aiStatus').textContent = `${filled}問を読み取りました。要確認：${unsure}問。答案と見比べてから保存してください。`;
-    } catch (err) {
-      $('#aiStatus').textContent = '読み取りに失敗しました：' + err.message;
-    } finally {
-      $('#btnAiRead').disabled = false;
-      paint();
-    }
-  });
-
-  // ===== ③ 集計・指導ヒント =====
+  // ===== ④ 集計・評価確定 =====
   function computeStats(t) {
     const r = resOf(t.id);
     const nos = Object.keys(r).map(Number).sort((a, b) => a - b);
@@ -781,18 +1099,22 @@
       const common = Object.entries(wrongAns).sort((a, b) => b[1] - a[1]).slice(0, 3);
       return { i, q, graded, rate: graded ? (graded - wrongNos.length) / graded : null, wrongNos, common };
     });
-    const students = done.map((no) => ({ no, ...scoreOf(t, r[no].marks), wrong: t.questions.map((_, i) => i).filter((i) => r[no].marks[i] === 'x') }));
-    return { r, nos, done, absent: nos.filter((no) => r[no].absent), qs, students };
+    const students = done.map((no) => {
+      const sc = scoreOf(t, r[no].marks);
+      return { no, ...sc, grade: gradeOf(t, sc.got, sc.full), wrong: t.questions.map((_, i) => i).filter((i) => r[no].marks[i] === 'x') };
+    });
+    const pend = Object.keys(bucket(pending, t.id)).map(Number).sort((a, b) => a - b);
+    return { r, nos, done, absent: nos.filter((no) => r[no].absent), qs, students, pend };
   }
 
   function buildHints(t, s) {
     const out = [];
-    if (!s.done.length) return ['まだ丸つけ結果がありません。'];
+    if (s.pend.length) out.push(`<strong>AI読取で未確認の子が ${s.pend.length} 人います</strong>（出席番号 ${s.pend.join('・')}）。③で確認すると集計に入ります。`);
+    if (!s.done.length) return out.length ? out : ['まだ丸つけ結果がありません。'];
     const pct = (x) => Math.round(x * 100) + '%';
     const label = (x) => `問${x.i + 1}（${esc(showKey(x.q.ans))}）`;
 
-    const low = s.qs.filter((x) => x.rate !== null && x.rate < 0.5);
-    low.forEach((x) => {
+    s.qs.filter((x) => x.rate !== null && x.rate < 0.5).forEach((x) => {
       let h = `<strong>${label(x)}</strong> は正答率 ${pct(x.rate)}。クラス全体での振り返りを推奨します。`;
       if (x.common.length) h += ` よくある誤答：${x.common.map(([a, c]) => `「${esc(a)}」${c}人`).join('、')}。誤答の傾向から、つまずきの原因（字形・送り仮名・計算手順など）を確認できます。`;
       out.push(h);
@@ -801,34 +1123,33 @@
       out.push(`${label(x)} は正答率 ${pct(x.rate)}。出席番号 ${x.wrongNos.join('・')} の子に個別に声かけを。`);
     });
 
-    // 観点タグ・種別ごとの正答率
+    // 観点タグごとの正答率
     const group = {};
     s.qs.forEach((x) => {
-      const k = x.q.tag ? `観点「${x.q.tag}」` : null;
-      if (!k || x.rate === null) return;
-      (group[k] ||= { ok: 0, all: 0 });
-      group[k].all += x.graded; group[k].ok += x.graded - x.wrongNos.length;
+      if (!x.q.tag || x.rate === null) return;
+      const g = (group[x.q.tag] ||= { ok: 0, all: 0 });
+      g.all += x.graded; g.ok += x.graded - x.wrongNos.length;
     });
     Object.entries(group).filter(([, g]) => g.all && g.ok / g.all < 0.7)
-      .forEach(([k, g]) => out.push(`${esc(k)} の正答率が ${pct(g.ok / g.all)} と低めです。次の授業で重点的に扱うと効果的です。`));
+      .forEach(([k, g]) => out.push(`観点「${esc(k)}」の正答率が ${pct(g.ok / g.all)} と低めです。次の授業で重点的に扱うと効果的です。`));
 
-    // 個別：得点率が低い子と、同じ観点でまとまって間違えている子
+    // 個別：評価Cの子と、同じ観点でまとまって間違えている子
     s.students.forEach((st) => {
       if (!st.full) return;
       const tags = {};
       st.wrong.forEach((i) => { const tg = t.questions[i].tag; if (tg) tags[tg] = (tags[tg] || 0) + 1; });
       const rep = Object.entries(tags).filter(([, c]) => c >= 2).map(([tg]) => `「${esc(tg)}」`);
-      if (st.got / st.full < 0.6) {
-        out.push(`出席番号 ${st.no}：${st.got}/${st.full} 点。×は 問${st.wrong.map((i) => i + 1).join('・')}${rep.length ? `。特に ${rep.join('')} でつまずきが重なっています` : ''}。`);
+      if (st.grade === 'C') {
+        out.push(`出席番号 ${st.no}：${st.got}/${st.full} 点（評価C）。×は 問${st.wrong.map((i) => i + 1).join('・')}${rep.length ? `。特に ${rep.join('')} でつまずきが重なっています` : ''}。`);
       } else if (rep.length) {
         out.push(`出席番号 ${st.no}：${rep.join('')} で複数間違えています。`);
       }
     });
 
-    const missing = classSize() - s.nos.length;
+    const missing = classSize() - s.nos.length - s.pend.filter((no) => !s.r[no]).length;
     if (missing > 0) out.push(`未入力が ${missing} 人います。`);
     if (s.absent.length) out.push(`未提出：出席番号 ${s.absent.join('・')}`);
-    if (!out.length) out.push('目立ったつまずきはありません。全問の正答率が80%以上です。');
+    if (out.length === (s.pend.length ? 1 : 0)) out.push('目立ったつまずきはありません。全問の正答率が80%以上です。');
     return out;
   }
 
@@ -837,11 +1158,13 @@
     const s = computeStats(t);
     const full = t.questions.reduce((a, q) => a + q.pts, 0);
     const avg = s.students.length ? s.students.reduce((a, x) => a + x.got, 0) / s.students.length : null;
+    const cnt = (g) => s.students.filter((x) => x.grade === g).length;
     $('#statGrid').innerHTML = [
-      ['丸つけ済み', `${s.done.length}人`],
+      ['確認済み', `${s.done.length}人`],
+      ['未確認（AI読取）', `${s.pend.length}人`],
       ['未提出', `${s.absent.length}人`],
       ['平均点', avg === null ? '—' : `${avg.toFixed(1)}/${full}`],
-      ['問題数', `${t.questions.length}問`],
+      ['評価 A / B / C', `${cnt('A')}/${cnt('B')}/${cnt('C')}`],
     ].map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
 
     $('#hints').innerHTML = buildHints(t, s).map((h) => `<li>${h}</li>`).join('');
@@ -863,8 +1186,42 @@
     $('#sStatsBody').innerHTML = s.students.map((st) => `<tr>
       <td class="num">${st.no}</td>
       <td class="num">${st.got}/${st.full}</td>
+      <td>${st.grade}</td>
       <td>${st.wrong.map((i) => '問' + (i + 1)).join('、') || '全問正解'}</td>
     </tr>`).join('');
+
+    // 評価確定
+    const fin = finals[t.id];
+    const box = $('#finalBox');
+    box.classList.toggle('done', !!fin);
+    box.innerHTML = fin
+      ? `<strong>✅ ${esc(fin)} に評価を確定しました。</strong>
+         <p class="muted" style="margin:6px 0 10px">③ での修正・写真の取り込み・CSVの読み込みはできません。確定した結果をCSVに書き出して保存してください。</p>
+         <button class="btn danger" id="btnUnfinal">確定を解除する</button>`
+      : `<strong>評価の確定</strong>
+         <p class="muted" style="margin:6px 0 10px">全員の確認が終わったら確定します。確定すると書き換えできなくなり、CSVに「確定」と日時が入ります。</p>
+         <button class="btn green" id="btnFinal">評価を確定する</button>`;
+    $('#btnFinal')?.addEventListener('click', () => doFinalize(t, computeStats(t)));
+    $('#btnUnfinal')?.addEventListener('click', () => {
+      if (!confirm('評価の確定を解除しますか？（解除すると結果を直せるようになります）')) return;
+      delete finals[t.id]; unsavedResults = true; draft = null; renderStats();
+    });
+    $('#lblImportCsv').classList.toggle('disabled', !!fin);
+    $('#btnClearResults').disabled = !!fin;
+  }
+
+  function doFinalize(t, s) {
+    if (!confirmLeaveDraft()) return;
+    if (s.pend.length) { alert(`AI読取で未確認の子がいます（出席番号 ${s.pend.join('・')}）。③で確認してから確定してください。`); return; }
+    if (!s.done.length) { alert('確認済みの結果がありません。'); return; }
+    const missing = [];
+    for (let i = 1; i <= classSize(); i++) if (!s.r[i]) missing.push(i);
+    if (missing.length && !confirm(`結果のない子がいます（出席番号 ${missing.join('・')}）。この子たちを「未提出」として確定しますか？`)) return;
+    missing.forEach((no) => { s.r[no] = { absent: true }; });
+    finals[t.id] = new Date().toLocaleString('ja-JP', { dateStyle: 'short', timeStyle: 'short' });
+    unsavedResults = true; draft = null;
+    renderStats();
+    alert('評価を確定しました。忘れずに「結果をCSVで書き出す」で保存してください。');
   }
 
   // ===== CSV =====
@@ -878,14 +1235,16 @@
 
   $('#btnExportCsv').addEventListener('click', () => {
     const t = curTest(), s = computeStats(t);
-    const head = ['出席番号', '提出', '得点', '満点', ...t.questions.flatMap((_, i) => [`問${i + 1}答`, `問${i + 1}判定`])];
+    if (s.pend.length && !confirm(`AI読取で未確認の子（${s.pend.length}人）はCSVに入りません。書き出しますか？`)) return;
+    const state = finals[t.id] ? `確定 ${finals[t.id]}` : '確認済';
+    const head = ['出席番号', '提出', '得点', '満点', '評価', '状態', ...t.questions.flatMap((_, i) => [`問${i + 1}答`, `問${i + 1}判定`])];
     const rows = s.nos.map((no) => {
       const x = s.r[no];
-      if (x.absent) return [no, '未提出', '', '', ...t.questions.flatMap(() => ['', ''])];
+      if (x.absent) return [no, '未提出', '', '', '', state, ...t.questions.flatMap(() => ['', ''])];
       const { got, full } = scoreOf(t, x.marks);
-      return [no, '済', got, full, ...t.questions.flatMap((_, i) => [x.answers[i] ?? '', x.marks[i] === 'o' ? '○' : x.marks[i] === 'x' ? '×' : ''])];
+      return [no, '済', got, full, gradeOf(t, got, full), state, ...t.questions.flatMap((_, i) => [x.answers[i] ?? '', x.marks[i] === 'o' ? '○' : x.marks[i] === 'x' ? '×' : ''])];
     });
-    download(`${t.name}_結果.csv`, toCsv([head, ...rows]), 'text/csv');
+    download(`${t.name}_結果${finals[t.id] ? '_確定' : ''}.csv`, toCsv([head, ...rows]), 'text/csv');
     unsavedResults = false;
   });
   $('#btnExportQCsv').addEventListener('click', () => {
@@ -897,20 +1256,23 @@
     const f = e.target.files[0]; e.target.value = '';
     if (!f) return;
     const t = curTest();
+    if (isFinal()) { alert('評価確定済みのため読み込めません。'); return; }
     try {
       const rows = parseCsv((await f.text()).replace(/^﻿/, ''));
       const head = rows.shift() || [];
-      if (head[0] !== '出席番号' || head.length !== 4 + t.questions.length * 2) throw new Error('このテストの結果CSVではありません（問題数が違います）');
+      const off = head[4] === '評価' ? 6 : 4;   // 評価列のない古い形式にも対応
+      if (head[0] !== '出席番号' || head.length !== off + t.questions.length * 2) throw new Error('このテストの結果CSVではありません（問題数が違います）');
       const r = resOf(t.id);
       let count = 0;
       rows.forEach((row) => {
         const no = Number(row[0]);
         if (!no) return;
+        delete bucket(pending, t.id)[no];
         if (row[1] === '未提出') { r[no] = { absent: true }; count++; return; }
         const answers = [], marks = [];
         t.questions.forEach((_, i) => {
-          answers.push((row[4 + i * 2] ?? '').replace(/^'/, ''));
-          const m = row[5 + i * 2];
+          answers.push((row[off + i * 2] ?? '').replace(/^'/, ''));
+          const m = row[off + 1 + i * 2];
           marks.push(m === '○' ? 'o' : m === '×' ? 'x' : '');
         });
         r[no] = { absent: false, answers, marks }; count++;
@@ -938,10 +1300,16 @@
     if (cell || row.length) { row.push(cell); rows.push(row); }
     return rows;
   }
+  function dropTestData(id) {
+    const keep = new Set(batch.map((b) => b.url));
+    Object.values(photos[id] || {}).forEach((p) => { if (!keep.has(p.url)) URL.revokeObjectURL(p.url); });
+    delete results[id]; delete pending[id]; delete photos[id]; delete finals[id];
+  }
   $('#btnClearResults').addEventListener('click', () => {
     const t = curTest();
-    if (!confirm(`「${t.name}」の丸つけ結果をすべて消去しますか？（CSVに書き出していない分は戻せません）`)) return;
-    delete results[t.id]; draft = null; studentNo = 1;
+    if (isFinal()) return;
+    if (!confirm(`「${t.name}」の丸つけ結果・AI読取結果・写真の割り当てをすべて消去しますか？（CSVに書き出していない分は戻せません）`)) return;
+    dropTestData(t.id); draft = null; studentNo = 1;
     renderStats(); renderMark();
   });
 
@@ -954,7 +1322,8 @@
   }
 
   window.addEventListener('beforeunload', (e) => {
-    if (unsavedResults || draft?.dirty) { e.preventDefault(); e.returnValue = ''; }
+    const anyPending = Object.values(pending).some((p) => Object.keys(p).length);
+    if (unsavedResults || anyPending || draft?.dirty || running) { e.preventDefault(); e.returnValue = ''; }
   });
 
   // ===== 初期化 =====
